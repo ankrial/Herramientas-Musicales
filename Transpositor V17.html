@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transpositor de Notas</title>
+    <!-- Incluyendo Tailwind CSS para un estilo moderno y adaptable -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluyendo Firebase SDKs -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <style>
+        /* Estilo para la fuente 'Inter' y el cuerpo con un fondo oscuro */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Estilos generales para el modo oscuro */
+        body.dark {
+            background-color: #1f2937; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        body.dark #mainApp {
+            background-color: #1f2937; /* bg-gray-800 */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        body.dark .bg-gray-200, body.dark .bg-gray-300 {
+            background-color: #4b5563; /* bg-gray-600 */
+            color: #f3f4f6;
+        }
+        body.dark .text-gray-900 {
+            color: #f3f4f6;
+        }
+        body.dark .bg-gray-700 {
+            background-color: #374151; /* bg-gray-700 */
+        }
+        /* Color del título en modo oscuro */
+        body.dark .main-title {
+            color: transparent;
+            background-clip: text;
+            background-image: linear-gradient(to right, #2dd4bf, #06b6d4); /* from-teal-400 to-cyan-500 */
+        }
+        body.dark .secondary-title, body.dark .label-text {
+            color: #d1d5db; /* text-gray-300 */
+        }
+
+        /* Estilos específicos para el modo claro */
+        body.light {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #1f2937; /* text-gray-900 */
+        }
+        body.light #mainApp {
+            background-color: #ffffff; /* bg-white */
+            color: #1f2937;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        /* Corregir el color de fondo de los textos en modo claro para que se diferencie */
+        body.light #inputNotes, body.light #outputNotes, body.light #harmonicOutput, body.light #chordLibraryOutput, body.light #progressionsList {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            color: #1f2937;
+        }
+        /* Nuevo: Estilo de botones en modo claro para evitar que se "pierdan" */
+        body.light .bg-gray-300 {
+            background-color: #9ca3af; /* bg-gray-400 */
+            color: #1f2937;
+        }
+        body.light .bg-gray-300:hover {
+            background-color: #6b7280; /* bg-gray-500 */
+        }
+        /* Nuevo: Estilo para los botones '+', '-', selectores y slider en modo claro */
+        body.light .bg-gray-700 {
+            background-color: #4b5563; /* bg-gray-600 */
+            color: #f3f4f6;
+        }
+        body.light .bg-gray-700:hover {
+            background-color: #374151; /* bg-gray-700 */
+        }
+
+        body.light .bg-teal-400 {
+            background-color: #2dd4bf;
+        }
+        /* Nuevo: Color de los títulos en modo claro */
+        body.light .main-title {
+            color: transparent;
+            background-clip: text;
+            background-image: linear-gradient(to right, #0d9488, #0891b2); /* from-teal-700 to-cyan-700 */
+        }
+        body.light .secondary-title, body.light .label-text {
+            color: #1f2937; /* text-gray-900 */
+        }
+
+        /* Estilo personalizado para el slider de tempo */
+        #tempoSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background-color: #2dd4bf; /* Color del thumb */
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        #tempoSlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background-color: #2dd4bf;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        /* Estilo para el modal de ayuda */
+        .help-modal, .save-modal {
+            @apply fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50;
+        }
+
+        /* Altura máxima y overflow-y para el modal de ayuda */
+        .help-content, .save-content {
+            @apply bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-4;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        /* Estilo para los indicadores de beat */
+        .beat-indicator {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+            border-radius: 9999px; /* Para que sea un círculo */
+            background-color: #4b5563; /* bg-gray-700 */
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center; /* Centrar verticalmente el número */
+            justify-content: center; /* Centrar horizontalmente el número */
+            font-weight: bold;
+        }
+        .beat-indicator.on {
+            background-color: #2dd4bf; /* bg-teal-400 */
+            color: #111827; /* text-gray-900 */
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(45, 212, 191, 0.8);
+        }
+        /* Estilo para el primer beat */
+        .beat-indicator.on.first-beat {
+            background-color: #22d3ee; /* bg-cyan-400 */
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.9);
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        /* Estilos para el switch del modo público y transposición automática */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #4b5563; /* bg-gray-600 */
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2dd4bf; /* bg-teal-400 */
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .progression-item {
+            @apply flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow-md cursor-pointer hover:bg-gray-600 transition-colors;
+        }
+
+    </style>
+    <!-- Phosphor Icons para los iconos -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/dist/phosphor.js"></script>
+</head>
+<!-- Fondo del cuerpo con un degradado sutil -->
+<body class="bg-gradient-to-br from-gray-900 to-slate-800 text-gray-100 min-h-screen flex items-center justify-center p-4">
+    <!-- Contenedor principal de la aplicación -->
+    <div id="mainApp" class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl max-w-2xl w-full space-y-6 transform transition-transform duration-300">
+        <div class="flex justify-between items-center mb-4">
+            <button id="themeToggle" class="p-2 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors">
+                <i class="ph-bold ph-sun text-xl" id="themeIcon"></i>
+            </button>
+            <h1 class="text-3xl sm:text-4xl font-bold text-center main-title">
+                Transpositor de Notas
+            </h1>
+            <button id="helpBtn" class="p-2 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors">
+                <i class="ph-bold ph-info text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Sección de entrada -->
+        <div>
+            <label for="inputNotes" class="block text-lg font-medium label-text mb-2">Notas Originales:</label>
+            <textarea id="inputNotes" rows="4" class="w-full p-3 bg-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none placeholder-gray-600" placeholder="Ejemplo:
+(Verso)
+C G Am F"></textarea>
+        </div>
+
+        <!-- Controles de transposición -->
+        <div class="space-y-4">
+            <!-- Selector de semitonos con botones -->
+            <div class="flex items-center justify-between space-x-2">
+                <label class="text-lg font-medium label-text">Semitonos:</label>
+                <div class="flex items-center space-x-2">
+                    <button id="decreaseBtn" class="bg-gray-700 text-white font-bold text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-800">
+                        -
+                    </button>
+                    <span id="semitonesDisplay" class="text-3xl font-bold text-teal-400 w-12 text-center select-none">0</span>
+                    <button id="increaseBtn" class="bg-gray-700 text-white font-bold text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-800">
+                        +
+                    </button>
+                    <button id="lockBtn" class="p-2 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors">
+                        <i class="ph-bold ph-unlock text-xl" id="lockIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nuevo control para la transposición automática -->
+            <div class="flex items-center justify-between space-x-2">
+                <label for="autoTransposeToggle" class="text-lg font-medium label-text">Transposición automática:</label>
+                <label class="switch">
+                    <input type="checkbox" id="autoTransposeToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Selector de notación -->
+            <div class="flex items-center justify-between space-x-2">
+                <label class="text-lg font-medium label-text">Notación:</label>
+                <div class="flex space-x-2">
+                    <button id="sharpBtn" class="px-4 py-2 rounded-full font-bold text-gray-900 bg-teal-400 hover:bg-teal-500 transition-colors"># (Sostenidos)</button>
+                    <button id="flatBtn" class="px-4 py-2 rounded-full font-bold text-gray-900 bg-gray-300 hover:bg-gray-400 transition-colors">b (Bemoles)</button>
+                    <button id="solfegeBtn" class="px-4 py-2 rounded-full font-bold text-gray-900 bg-gray-300 hover:bg-gray-400 transition-colors">Solfeo</button>
+                </div>
+            </div>
+            
+            <!-- Botones de transposición y limpieza -->
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
+                <button id="transposeBtn" class="w-full font-bold py-3 rounded-xl transition-all duration-300 text-gray-900 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400">
+                    Transponer (Ctrl + T)
+                </button>
+                <button id="clearBtn" class="w-full font-bold py-3 rounded-xl transition-all duration-300 text-gray-900 bg-gray-300 hover:bg-gray-400 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                    Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección de salida -->
+        <div>
+            <label for="outputNotes" class="block text-lg font-medium label-text mb-2">Notas Transpuestas:</label>
+            <div class="relative">
+                <div id="outputNotes" class="w-full p-3 pr-12 bg-gray-200 text-gray-900 rounded-xl min-h-[100px] whitespace-pre-wrap"></div>
+                <div class="absolute top-2 right-2 flex space-x-2">
+                    <button id="playBtn" class="p-2 bg-gray-700 text-gray-200 rounded-full hover:bg-gray-600 transition-colors">
+                        <i class="ph-bold ph-play text-xl"></i>
+                    </button>
+                    <button id="copyOutputBtn" class="p-2 bg-gray-700 text-gray-200 rounded-full hover:bg-gray-600 transition-colors">
+                        <i class="ph-bold ph-copy text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de metrónomo -->
+        <div id="metronomeSection" class="space-y-4 pt-4 border-t-4 border-gray-700">
+            <h2 class="text-2xl font-bold text-center secondary-title">Metrónomo</h2>
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="metronomeBtn" class="w-full sm:w-auto font-bold py-3 px-8 rounded-xl transition-all duration-300 text-gray-900 bg-gray-300 hover:bg-gray-400 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                    Iniciar Metrónomo
+                </button>
+            </div>
+            
+            <!-- Contenedor para los indicadores de beat -->
+            <div id="beatIndicatorContainer" class="flex flex-row justify-center items-center space-x-2 mt-16">
+                <!-- Los indicadores se generarán aquí con JavaScript -->
+            </div>
+             
+            <!-- Control de Tempo (BPM) y Compás -->
+            <div id="tempo-controls" class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8 mt-4">
+                <!-- Control de Tempo (BPM) -->
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <label for="tempoSlider" class="text-lg font-medium label-text">Tempo (BPM):</label>
+                        <span id="tempoDisplay" class="text-3xl font-bold text-teal-400 w-12 text-center select-none">120</span>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full">
+                        <button id="decreaseMetronomeTempoBtn" class="bg-gray-700 text-white font-bold text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-800">
+                            -
+                        </button>
+                        <input type="range" id="tempoSlider" min="40" max="240" value="120" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400">
+                        <button id="increaseMetronomeTempoBtn" class="bg-gray-700 text-white font-bold text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-800">
+                            +
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Control de Compás y Subdivisiones -->
+                <div class="flex flex-col items-center space-y-2">
+                    <label class="text-lg font-medium label-text">Compás:</label>
+                    <div class="flex items-center space-x-2">
+                        <button id="decreaseBeatBtn" class="bg-gray-700 text-white font-bold text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-800">
+                            -
+                        </button>
+                        <span id="beatsDisplay" class="text-3xl font-bold text-teal-400 w-12 text-center select-none">4</span>
+                        <button id="increaseBeatBtn" class="bg-gray-700 text-white font-bold text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-800">
+                            +
+                        </button>
+                    </div>
+                    <label class="text-lg font-medium label-text mt-4">Subdivisión:</label>
+                    <!-- Los valores de las opciones se han corregido para que funcionen con Tone.js -->
+                    <select id="subdivisionSelector" class="p-2 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400">
+                        <option value="4n">Negras (1/4)</option>
+                        <option value="8n">Corcheas (1/8)</option>
+                        <option value="8t">Tresillos (1/8T)</option>
+                        <option value="16n">Semicorcheas (1/16)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Selector de sonido para el metrónomo -->
+            <div class="flex items-center justify-between space-x-2 mt-4">
+                <!-- Se ha añadido 'mb-2' al label para mejorar el espaciado -->
+                <label class="text-lg font-medium label-text mb-2">Sonido:</label>
+                <select id="soundSelector" class="p-2 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400">
+                    <option value="highClick">Click Alto</option>
+                    <option value="lowClick">Click Bajo</option>
+                    <option value="cowbell">Cencerro</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Sección de Guardar/Cargar progresiones -->
+        <div id="storageSection" class="space-y-4 pt-4 border-t-4 border-gray-700">
+            <h2 class="text-2xl font-bold text-center secondary-title">Guardar y Cargar Progresiones</h2>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="progressionNameInput" placeholder="Nombre de la progresión" class="w-full p-3 bg-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400">
+                <button id="saveBtn" class="w-full sm:w-auto font-bold py-3 px-8 rounded-xl transition-all duration-300 text-gray-900 bg-teal-500 hover:bg-teal-600 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400">
+                    Guardar
+                </button>
+            </div>
+            
+            <div class="flex items-center justify-between space-x-2">
+                <label for="publicToggle" class="text-lg font-medium label-text">Compartir públicamente:</label>
+                <label class="switch">
+                    <input type="checkbox" id="publicToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="searchProgressionsInput" placeholder="Buscar progresiones" class="w-full p-3 bg-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400">
+            </div>
+
+            <div id="progressionsList" class="w-full p-3 bg-gray-200 text-gray-900 rounded-xl min-h-[100px] overflow-y-auto">
+                <!-- Las progresiones guardadas se mostrarán aquí -->
+            </div>
+        </div>
+
+        <!-- Sección de Armonías y Escalas -->
+        <div id="harmonicSection" class="space-y-4 pt-4 border-t-4 border-gray-700">
+            <h2 class="text-2xl font-bold text-center secondary-title">Acordes y Escalas Armónicas</h2>
+            <div class="flex items-center justify-center space-x-2">
+                <label for="rootNoteSelector" class="text-lg font-medium label-text">Nota Raíz:</label>
+                <select id="rootNoteSelector" class="p-2 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"></select>
+            </div>
+            
+            <div id="harmonicOutput" class="w-full p-4 bg-gray-200 text-gray-900 rounded-xl whitespace-pre-wrap min-h-[100px] mt-4 text-xl">
+                <!-- Los acordes y escalas se mostrarán aquí -->
+            </div>
+        </div>
+        
+        <!-- Sección de Librería de Acordes -->
+        <div id="chordLibrarySection" class="space-y-4 pt-4 border-t-4 border-gray-700">
+            <h2 class="text-2xl font-bold text-center secondary-title">Librería de Acordes</h2>
+            <div class="flex items-center justify-center space-x-2">
+                <label for="chordSearchInput" class="text-lg font-medium label-text">Buscar Acorde:</label>
+                <input type="text" id="chordSearchInput" placeholder="Ej: C, Am, G7" class="w-full p-2 bg-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400">
+            </div>
+            <div id="chordLibraryOutput" class="w-full p-4 bg-gray-200 text-gray-900 rounded-xl whitespace-pre-wrap min-h-[50px] mt-4 text-xl">
+                <!-- Los detalles del acorde se mostrarán aquí -->
+            </div>
+        </div>
+        
+        <!-- Contenedor de mensajes (alerta) -->
+        <div id="messageBox" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow-xl text-center z-50">
+            Mensaje de prueba.
+        </div>
+        <!-- Modal de ayuda -->
+        <div id="helpModal" class="help-modal hidden">
+            <div class="help-content">
+                <h3 class="text-2xl font-bold text-teal-400 text-center">Guía de Uso</h3>
+                <ul class="list-disc list-inside text-gray-300 space-y-2">
+                    <li> El transpositor cambia el tono de tus acordes. Usa los botones **+** y **-** para ajustar los semitonos. </li>
+                    <li> Ahora puedes activar o desactivar la **Transposición automática** con un switch. Cuando está desactivada, los botones **+** y **-** solo cambian los semitonos, y debes usar el botón **Transponer** (o `Ctrl + T`) para ver el resultado. </li>
+                    <li> Usa el botón **# (Sostenidos)**, **b (Bemoles)** o **Solfeo** para elegir el tipo de notación musical. </li>
+                    <li> Puedes **reproducir** los acordes transpuestos con el botón de play. </li>
+                    <li> El **Metrónomo** ahora te permite ajustar el **Tempo (BPM)** y el **Compás**. </li>
+                    <li> El **Metrónomo** tiene un indicador visual del beat, y puedes cambiar el sonido. </li>
+                    <li> Puedes **guardar tus progresiones** en la nube con un nombre. También puedes hacerlas públicas para compartirlas. </li>
+                    <li> La **Librería de Acordes** te permite buscar acordes por nombre y ver qué notas los componen. </li>
+                    <li> El botón **Limpiar** borra la sección de notas originales y el resultado transpuesto. </li>
+                    <li> Puedes alternar entre modo oscuro y claro con el botón de sol/luna. </li>
+                </ul>
+                <div class="flex justify-center mt-4">
+                    <button id="closeHelpModal" class="px-6 py-2 bg-teal-500 text-gray-900 font-bold rounded-xl hover:bg-teal-600 transition-colors">
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Modal para guardar (usado para confirmar si se sobrescribe) -->
+        <div id="saveModal" class="save-modal hidden">
+            <div class="save-content">
+                <h3 id="saveModalTitle" class="text-xl font-bold text-center"></h3>
+                <p id="saveModalMessage" class="text-gray-300 text-center"></p>
+                <div class="flex justify-center space-x-4 mt-4">
+                    <button id="confirmSaveBtn" class="px-6 py-2 bg-teal-500 text-gray-900 font-bold rounded-xl hover:bg-teal-600 transition-colors">Confirmar</button>
+                    <button id="cancelSaveBtn" class="px-6 py-2 bg-gray-500 text-white font-bold rounded-xl hover:bg-gray-600 transition-colors">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, onSnapshot, collection, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase variables
+        let app, db, auth, userId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Global variables
+        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const flatNotes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+        const solfegeNotes = ["Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+        const allNotes = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
+        let currentNotation = 'sharp';
+        let transposeSemitones = 0;
+        let isLocked = false;
+        let isAutoTransposeEnabled = true;
+        let isMetronomeActive = false;
+        let metronomeBeatLoop = null; 
+        let metronomeSubdivisionLoop = null; 
+        let metronomeSound = 'highClick';
+        let beatsPerMeasure = 4;
+        let beatCount = 0;
+        let progressionsListener = null;
+
+        const chordFormations = {
+            'major': [0, 4, 7],
+            'minor': [0, 3, 7],
+            'diminished': [0, 3, 6],
+            'sus2': [0, 2, 7],
+            'sus4': [0, 5, 7],
+            'aug': [0, 4, 8],
+            '7': [0, 4, 7, 10],
+            'maj7': [0, 4, 7, 11],
+            'min7': [0, 3, 7, 10],
+            'm7b5': [0, 3, 6, 10]
+        };
+
+        const chordSuffixes = {
+            '': 'major', 'maj': 'major', 'M': 'major',
+            'm': 'minor', 'min': 'minor',
+            'dim': 'diminished', '°': 'diminished',
+            'sus2': 'sus2',
+            'sus4': 'sus4',
+            'aug': 'aug', '+': 'aug',
+            '7': '7',
+            'maj7': 'maj7', 'M7': 'maj7',
+            'm7': 'min7', 'min7': 'min7',
+            'm7b5': 'm7b5'
+        };
+
+        // DOM elements
+        const inputNotesEl = document.getElementById('inputNotes');
+        const outputNotesEl = document.getElementById('outputNotes');
+        const decreaseBtn = document.getElementById('decreaseBtn');
+        const increaseBtn = document.getElementById('increaseBtn');
+        const semitonesDisplayEl = document.getElementById('semitonesDisplay');
+        const transposeBtn = document.getElementById('transposeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyOutputBtn = document.getElementById('copyOutputBtn');
+        const playBtn = document.getElementById('playBtn');
+        const lockBtn = document.getElementById('lockBtn');
+        const lockIcon = document.getElementById('lockIcon');
+        const autoTransposeToggle = document.getElementById('autoTransposeToggle');
+        const sharpBtn = document.getElementById('sharpBtn');
+        const flatBtn = document.getElementById('flatBtn');
+        const solfegeBtn = document.getElementById('solfegeBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeHelpModalBtn = document.getElementById('closeHelpModal');
+        const messageBox = document.getElementById('messageBox');
+        
+        // Metronome elements
+        const metronomeBtn = document.getElementById('metronomeBtn');
+        const beatIndicatorContainerEl = document.getElementById('beatIndicatorContainer');
+        const tempoSlider = document.getElementById('tempoSlider');
+        const tempoDisplayEl = document.getElementById('tempoDisplay');
+        const decreaseMetronomeTempoBtn = document.getElementById('decreaseMetronomeTempoBtn');
+        const increaseMetronomeTempoBtn = document.getElementById('increaseMetronomeTempoBtn');
+        const decreaseBeatBtn = document.getElementById('decreaseBeatBtn');
+        const increaseBeatBtn = document.getElementById('increaseBeatBtn');
+        const beatsDisplayEl = document.getElementById('beatsDisplay');
+        const subdivisionSelector = document.getElementById('subdivisionSelector');
+        const soundSelector = document.getElementById('soundSelector');
+
+        // Harmonic Chords elements
+        const rootNoteSelector = document.getElementById('rootNoteSelector');
+        const harmonicOutputEl = document.getElementById('harmonicOutput');
+
+        // Storage elements
+        const saveBtn = document.getElementById('saveBtn');
+        const progressionNameInput = document.getElementById('progressionNameInput');
+        const publicToggle = document.getElementById('publicToggle');
+        const progressionsListEl = document.getElementById('progressionsList');
+        const searchProgressionsInput = document.getElementById('searchProgressionsInput');
+        const saveModal = document.getElementById('saveModal');
+        const saveModalTitle = document.getElementById('saveModalTitle');
+        const saveModalMessage = document.getElementById('saveModalMessage');
+        const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+        const cancelSaveBtn = document.getElementById('cancelSaveBtn');
+        
+        // Chord Library elements
+        const chordSearchInput = document.getElementById('chordSearchInput');
+        const chordLibraryOutputEl = document.getElementById('chordLibraryOutput');
+        
+        // Audio Synth
+        const synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "triangle" },
+            envelope: {
+                attack: 0.05,
+                decay: 0.1,
+                sustain: 0.3,
+                release: 1
+            }
+        }).toDestination();
+        
+        // Firebase initialization and authentication
+        async function initFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error al inicializar Firebase o autenticar:", error);
+                await signInAnonymously(auth);
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Usuario autenticado. ID:", userId);
+                    showMessage(`Usuario ID: ${userId.substring(0, 8)}...`);
+                    setupProgressionsListener();
+                } else {
+                    console.log("No se pudo autenticar al usuario.");
+                    userId = null;
+                }
+            });
+        }
+        
+        // Transposition functions
+        function getNoteIndex(note) {
+            let notationArray;
+            if (currentNotation === 'solfege') {
+                notationArray = solfegeNotes;
+            } else if (currentNotation === 'flat') {
+                notationArray = flatNotes;
+            } else {
+                notationArray = notes;
+            }
+        
+            let sharpIndex = notes.indexOf(note);
+            if (sharpIndex !== -1) return sharpIndex;
+        
+            let flatIndex = flatNotes.indexOf(note);
+            if (flatIndex !== -1) return flatIndex;
+
+            let solfegeIndex = solfegeNotes.indexOf(note);
+            if (solfegeIndex !== -1) return solfegeIndex;
+
+            return -1;
+        }
+
+        // Función corregida para transponer notas
+        function transposeNotes() {
+            const input = inputNotesEl.value.trim();
+            if (!input) {
+                outputNotesEl.textContent = '';
+                return;
+            }
+        
+            // Expresión regular para encontrar acordes (Ej: C, D#, Gm7, Am, etc.)
+            const chordRegex = /([A-G][#b]?)([a-zA-Z0-9°+-]*)/g;
+            let transposedText = input.replace(chordRegex, (match, baseNote, suffix) => {
+                const baseIndex = getNoteIndex(baseNote);
+                if (baseIndex === -1) {
+                    return match;
+                }
+                const newIndex = (baseIndex + transposeSemitones + 12) % 12;
+                let newBaseNote;
+                if (currentNotation === 'solfege') {
+                    newBaseNote = solfegeNotes[newIndex];
+                } else if (currentNotation === 'sharp') {
+                    newBaseNote = notes[newIndex];
+                } else {
+                    newBaseNote = flatNotes[newIndex];
+                }
+                return newBaseNote + suffix;
+            });
+        
+            outputNotesEl.textContent = transposedText;
+        }
+        
+        function updateNotation(notation) {
+            currentNotation = notation;
+            sharpBtn.classList.remove('bg-teal-400', 'hover:bg-teal-500');
+            sharpBtn.classList.add('bg-gray-300', 'hover:bg-gray-400');
+            flatBtn.classList.remove('bg-teal-400', 'hover:bg-teal-500');
+            flatBtn.classList.add('bg-gray-300', 'hover:bg-gray-400');
+            solfegeBtn.classList.remove('bg-teal-400', 'hover:bg-teal-500');
+            solfegeBtn.classList.add('bg-gray-300', 'hover:bg-gray-400');
+
+            if (notation === 'sharp') {
+                sharpBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
+            } else if (notation === 'flat') {
+                flatBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
+            } else {
+                solfegeBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
+            }
+            if (isAutoTransposeEnabled) {
+                transposeNotes();
+            }
+            // Al cambiar la notación, también actualizamos la armonía y la librería de acordes
+            generateHarmonicChords();
+            searchChordLibrary();
+        }
+        
+        function showMessage(text) {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Metronome functions
+        const highClick = new Tone.Synth({
+            oscillator: { type: "square" },
+            envelope: { attack: 0.001, decay: 0.1, sustain: 0.01, release: 0.01 }
+        }).toDestination();
+        const lowClick = new Tone.Synth({
+            oscillator: { type: "triangle" },
+            envelope: { attack: 0.001, decay: 0.1, sustain: 0.01, release: 0.01 }
+        }).toDestination();
+        const cowbell = new Tone.MembraneSynth({
+            "pitchDecay": 0.008,
+            "envelope": { attack: 0.001, decay: 0.4, sustain: 0 },
+            "octaves": 2
+        }).toDestination();
+        
+        const metronomeSounds = {
+            'highClick': highClick,
+            'lowClick': lowClick,
+            'cowbell': cowbell
+        };
+        
+        // Dynamically create beat indicators
+        function createBeatIndicators() {
+            beatIndicatorContainerEl.innerHTML = '';
+            for (let i = 1; i <= beatsPerMeasure; i++) {
+                const indicator = document.createElement('div');
+                indicator.className = 'beat-indicator'; 
+                indicator.textContent = i;
+                beatIndicatorContainerEl.appendChild(indicator);
+            }
+        }
+        
+        function metronomeBeatTick(time) {
+            const indicators = beatIndicatorContainerEl.children;
+            const currentBeat = beatCount % beatsPerMeasure;
+
+            for(let i = 0; i < indicators.length; i++) {
+                indicators[i].classList.remove('on', 'first-beat');
+            }
+            const currentIndicator = indicators[currentBeat];
+            if (currentIndicator) {
+                currentIndicator.classList.add('on');
+                if (currentBeat === 0) {
+                    currentIndicator.classList.add('first-beat');
+                }
+            }
+            if (currentBeat === 0) {
+                metronomeSounds['highClick'].triggerAttackRelease("C5", "8n", time);
+            } else {
+                metronomeSounds[metronomeSound].triggerAttackRelease("C4", "8n", time);
+            }
+            beatCount++;
+        }
+        
+        function startMetronome() {
+            if (isMetronomeActive) return;
+            isMetronomeActive = true;
+            metronomeBtn.textContent = 'Detener Metrónomo';
+            metronomeBtn.classList.remove('bg-gray-300', 'hover:bg-gray-400');
+            metronomeBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+            Tone.Transport.bpm.value = parseInt(tempoSlider.value, 10);
+            if (metronomeBeatLoop !== null) {
+                metronomeBeatLoop.stop();
+                metronomeBeatLoop.dispose();
+            }
+            beatCount = 0;
+            metronomeBeatLoop = new Tone.Loop(metronomeBeatTick, subdivisionSelector.value);
+            metronomeBeatLoop.start(0);
+            Tone.Transport.start();
+        }
+
+        function stopMetronome() {
+            if (!isMetronomeActive) return;
+            isMetronomeActive = false;
+            metronomeBtn.textContent = 'Iniciar Metrónomo';
+            metronomeBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            metronomeBtn.classList.add('bg-gray-300', 'hover:bg-gray-400');
+            const indicators = beatIndicatorContainerEl.children;
+            for(let i = 0; i < indicators.length; i++) {
+                indicators[i].classList.remove('on', 'first-beat');
+            }
+            if (metronomeBeatLoop !== null) {
+                metronomeBeatLoop.stop();
+                metronomeBeatLoop.dispose();
+                metronomeBeatLoop = null;
+            }
+            Tone.Transport.stop();
+        }
+
+        function updateMetronomeUI() {
+            tempoDisplayEl.textContent = tempoSlider.value;
+            beatsDisplayEl.textContent = beatsPerMeasure;
+            createBeatIndicators();
+        }
+        
+        function copyOutputNotes() {
+            const notesToCopy = outputNotesEl.textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = notesToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showMessage("Notas copiadas al portapapeles.");
+            } catch (err) {
+                console.error("Error al copiar el texto:", err);
+                showMessage("Error al copiar el texto.");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Play functionality
+        function parseAndPlayChords() {
+            Tone.start();
+            const text = outputNotesEl.textContent;
+            if (!text) {
+                showMessage("No hay notas para reproducir.");
+                return;
+            }
+            
+            const chordRegex = /([A-G][#b]?)([a-zA-Z0-9°+-]*)/g;
+            const allChords = [...text.matchAll(chordRegex)].map(match => match[0]);
+
+            const duration = "4n";
+            let time = Tone.Time('0');
+
+            allChords.forEach(chordText => {
+                const parts = chordText.match(/([A-G][b#]?)(.*)/);
+                if (parts) {
+                    const baseNote = parts[1];
+                    const suffix = parts[2];
+                    const formationName = chordSuffixes[suffix] || 'major';
+                    const intervals = chordFormations[formationName];
+                    if (intervals) {
+                        const rootIndex = getNoteIndex(baseNote);
+                        if (rootIndex !== -1) {
+                            const noteNames = intervals.map(interval => {
+                                const newIndex = (rootIndex + interval + 12) % 12;
+                                return notes[newIndex] + '4'; // Usa la notación de sostenidos para Tone.js y octava 4
+                            });
+                            synth.triggerAttackRelease(noteNames, duration, time);
+                        }
+                    }
+                }
+                time = Tone.Time(time) + Tone.Time(duration);
+            });
+            showMessage("Reproduciendo acordes...");
+        }
+
+        // Harmonic Chords functions
+        function generateHarmonicChords() {
+            const selectedNote = rootNoteSelector.value;
+            const rootIndex = getNoteIndex(selectedNote);
+
+            if (rootIndex === -1) {
+                harmonicOutputEl.textContent = "Selecciona una nota válida.";
+                return;
+            }
+
+            let output = `Acordes y Escalas de ${selectedNote}:\n\n`;
+
+            const getNotesFromIntervals = (intervals) => {
+                const scaleNotes = intervals.map(interval => {
+                    const newIndex = (rootIndex + interval) % 12;
+                    let resultNote;
+                    if (currentNotation === 'solfege') {
+                        resultNote = solfegeNotes[newIndex];
+                    } else if (currentNotation === 'sharp') {
+                        resultNote = notes[newIndex];
+                    } else {
+                        resultNote = flatNotes[newIndex];
+                    }
+                    return resultNote;
+                });
+                return scaleNotes.join(' ');
+            };
+
+            // Definición de escalas y acordes por intervalos (semitonos)
+            const majorScaleIntervals = [0, 2, 4, 5, 7, 9, 11];
+            const minorScaleIntervals = [0, 2, 3, 5, 7, 8, 10];
+            const majorChordIntervals = [0, 4, 7];
+            const minorChordIntervals = [0, 3, 7];
+            const dominant7thIntervals = [0, 4, 7, 10];
+            const major7thIntervals = [0, 4, 7, 11];
+            const minor7thIntervals = [0, 3, 7, 10];
+
+            output += `Escala Mayor: ${getNotesFromIntervals(majorScaleIntervals)}\n`;
+            output += `Escala Menor (Natural): ${getNotesFromIntervals(minorScaleIntervals)}\n\n`;
+
+            output += `Acorde Mayor: ${getNotesFromIntervals(majorChordIntervals)}\n`;
+            output += `Acorde Menor: ${getNotesFromIntervals(minorChordIntervals)}\n\n`;
+
+            output += `Acorde Dominante 7: ${getNotesFromIntervals(dominant7thIntervals)}\n`;
+            output += `Acorde Mayor 7: ${getNotesFromIntervals(major7thIntervals)}\n`;
+            output += `Acorde Menor 7: ${getNotesFromIntervals(minor7thIntervals)}\n`;
+
+            harmonicOutputEl.textContent = output;
+        }
+
+        function populateNoteSelector() {
+            rootNoteSelector.innerHTML = '';
+            allNotes.forEach(note => {
+                const option = document.createElement('option');
+                option.value = note;
+                option.textContent = note;
+                rootNoteSelector.appendChild(option);
+            });
+            generateHarmonicChords();
+        }
+
+        // Chord Library functions
+        function searchChordLibrary() {
+            const searchText = chordSearchInput.value.trim();
+            if (!searchText) {
+                chordLibraryOutputEl.textContent = 'Ingresa un acorde (ej: C, Am, G7)';
+                return;
+            }
+
+            const parts = searchText.match(/([A-G][b#]?)(.*)/i);
+            if (!parts) {
+                chordLibraryOutputEl.textContent = 'Formato de acorde no válido.';
+                return;
+            }
+            const baseNote = parts[1];
+            const suffix = parts[2] || '';
+            const formationName = chordSuffixes[suffix.toLowerCase()];
+
+            if (!formationName || !chordFormations[formationName]) {
+                chordLibraryOutputEl.textContent = `Acorde no reconocido: ${searchText}`;
+                return;
+            }
+
+            const rootIndex = getNoteIndex(baseNote);
+            if (rootIndex === -1) {
+                chordLibraryOutputEl.textContent = `Nota base '${baseNote}' no reconocida.`;
+                return;
+            }
+
+            const intervals = chordFormations[formationName];
+            const chordNotes = intervals.map(interval => {
+                const newIndex = (rootIndex + interval + 12) % 12;
+                let resultNote;
+                if (currentNotation === 'solfege') {
+                    resultNote = solfegeNotes[newIndex];
+                } else if (currentNotation === 'sharp') {
+                    resultNote = notes[newIndex];
+                } else {
+                    resultNote = flatNotes[newIndex];
+                }
+                return resultNote;
+            });
+
+            chordLibraryOutputEl.textContent = `${searchText} = ${chordNotes.join(', ')}`;
+        }
+
+        // Firestore functions
+        async function saveChordProgression(name, content, isPublic) {
+            if (!userId) {
+                showMessage("Autenticación fallida. No se pudo guardar.");
+                return;
+            }
+            if (!name) {
+                showMessage("El nombre de la progresión no puede estar vacío.");
+                return;
+            }
+            
+            const collectionPath = isPublic ? `/artifacts/${appId}/public/data/progressions` : `/artifacts/${appId}/users/${userId}/progressions`;
+            const progressionsRef = collection(db, collectionPath);
+            const progressionQuery = query(progressionsRef, where("name", "==", name));
+
+            try {
+                const snapshot = await getDocs(progressionQuery);
+                if (!snapshot.empty) {
+                    showSaveModal(name, isPublic, snapshot.docs[0].id);
+                } else {
+                    await addDoc(progressionsRef, {
+                        name: name,
+                        content: content,
+                        isPublic: isPublic
+                    });
+                    showMessage(`Progression '${name}' guardada exitosamente.`);
+                }
+            } catch (error) {
+                console.error("Error saving progression:", error);
+                showMessage("Error al guardar la progresión.");
+            }
+        }
+
+        function setupProgressionsListener() {
+            if (progressionsListener) {
+                progressionsListener();
+            }
+
+            const privateCollectionRef = collection(db, `/artifacts/${appId}/users/${userId}/progressions`);
+            const publicCollectionRef = collection(db, `/artifacts/${appId}/public/data/progressions`);
+            
+            const privateQuery = query(privateCollectionRef);
+            const publicQuery = query(publicCollectionRef);
+
+            const privateListener = onSnapshot(privateQuery, (snapshot) => {
+                const privateProgressions = [];
+                snapshot.forEach(doc => {
+                    privateProgressions.push({ id: doc.id, ...doc.data() });
+                });
+                renderProgressionsList(privateProgressions, 'private');
+            });
+
+            const publicListener = onSnapshot(publicQuery, (snapshot) => {
+                const publicProgressions = [];
+                snapshot.forEach(doc => {
+                    publicProgressions.push({ id: doc.id, ...doc.data() });
+                });
+                renderProgressionsList(publicProgressions, 'public');
+            });
+            
+            progressionsListener = () => {
+                privateListener();
+                publicListener();
+            };
+        }
+
+        function renderProgressionsList(progressions, type) {
+            const listEl = progressionsListEl;
+            if (type === 'private') {
+                listEl.innerHTML = '';
+            }
+            
+            if (progressions.length === 0) {
+                listEl.innerHTML += `<p class="text-gray-400">No hay progresiones ${type === 'private' ? 'guardadas' : 'públicas'} aún.</p>`;
+                return;
+            }
+
+            progressions.forEach(prog => {
+                const item = document.createElement('div');
+                item.className = 'progression-item mt-2';
+                item.dataset.id = prog.id;
+                item.dataset.content = prog.content;
+                item.dataset.type = type;
+                
+                const nameText = document.createElement('span');
+                nameText.className = 'flex-grow text-white';
+                nameText.textContent = `${prog.name} (${type === 'public' ? 'Público' : 'Privado'})`;
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'p-2 rounded-full bg-teal-500 text-gray-900 hover:bg-teal-600 transition-colors mr-2';
+                loadBtn.innerHTML = `<i class="ph-bold ph-arrow-down text-xl"></i>`;
+                loadBtn.title = 'Cargar';
+                loadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    inputNotesEl.value = prog.content;
+                    progressionNameInput.value = prog.name;
+                    publicToggle.checked = prog.isPublic || false;
+                    if (isAutoTransposeEnabled) {
+                        transposeNotes();
+                    }
+                    showMessage(`Progression '${prog.name}' cargada.`);
+                });
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors';
+                deleteBtn.innerHTML = `<i class="ph-bold ph-trash text-xl"></i>`;
+                deleteBtn.title = 'Eliminar';
+                deleteBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const collectionPath = prog.isPublic ? `/artifacts/${appId}/public/data/progressions` : `/artifacts/${appId}/users/${userId}/progressions`;
+                    try {
+                        await deleteDoc(doc(db, collectionPath, prog.id));
+                        showMessage(`Progression '${prog.name}' eliminada.`);
+                    } catch (error) {
+                        console.error("Error deleting progression:", error);
+                        showMessage("Error al eliminar la progresión.");
+                    }
+                });
+
+                item.appendChild(nameText);
+                item.appendChild(loadBtn);
+                if (type === 'private' && prog.isPublic === false) {
+                    item.appendChild(deleteBtn);
+                }
+                listEl.appendChild(item);
+            });
+        }
+
+        function showSaveModal(name, isPublic, docId) {
+            saveModalTitle.textContent = "Sobrescribir Progresión";
+            saveModalMessage.textContent = `Ya existe una progresión llamada '${name}'. ¿Quieres sobrescribirla?`;
+            saveModal.classList.remove('hidden');
+
+            const handleConfirm = async () => {
+                const collectionPath = isPublic ? `/artifacts/${appId}/public/data/progressions` : `/artifacts/${appId}/users/${userId}/progressions`;
+                try {
+                    await setDoc(doc(db, collectionPath, docId), {
+                        name: name,
+                        content: inputNotesEl.value,
+                        isPublic: isPublic
+                    });
+                    showMessage(`Progresión '${name}' sobrescrita exitosamente.`);
+                    saveModal.classList.add('hidden');
+                    confirmSaveBtn.removeEventListener('click', handleConfirm);
+                } catch (error) {
+                    console.error("Error overwriting progression:", error);
+                    showMessage("Error al sobrescribir la progresión.");
+                }
+            };
+            
+            confirmSaveBtn.addEventListener('click', handleConfirm);
+            cancelSaveBtn.addEventListener('click', () => {
+                saveModal.classList.add('hidden');
+                confirmSaveBtn.removeEventListener('click', handleConfirm);
+            });
+        }
+
+        function filterProgressionsList() {
+            const searchTerm = searchProgressionsInput.value.toLowerCase();
+            const items = progressionsListEl.querySelectorAll('.progression-item');
+            items.forEach(item => {
+                const name = item.querySelector('span').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+
+        // Event Handlers
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light');
+            document.body.classList.toggle('dark');
+            if (document.body.classList.contains('light')) {
+                themeIcon.classList.remove('ph-moon');
+                themeIcon.classList.add('ph-sun');
+            } else {
+                themeIcon.classList.remove('ph-sun');
+                themeIcon.classList.add('ph-moon');
+            }
+        });
+        
+        helpBtn.addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+        });
+        
+        closeHelpModalBtn.addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+        });
+        
+        inputNotesEl.addEventListener('input', () => {
+            if (isAutoTransposeEnabled && !isLocked) {
+                transposeNotes();
+            }
+        });
+        
+        decreaseBtn.addEventListener('click', () => {
+            if (!isLocked) {
+                transposeSemitones--;
+                semitonesDisplayEl.textContent = transposeSemitones;
+                if (isAutoTransposeEnabled) {
+                    transposeNotes();
+                }
+            }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+            if (!isLocked) {
+                transposeSemitones++;
+                semitonesDisplayEl.textContent = transposeSemitones;
+                if (isAutoTransposeEnabled) {
+                    transposeNotes();
+                }
+            }
+        });
+        
+        transposeBtn.addEventListener('click', () => {
+            if (!isLocked) {
+                transposeNotes();
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            inputNotesEl.value = '';
+            outputNotesEl.textContent = '';
+        });
+
+        copyOutputBtn.addEventListener('click', copyOutputNotes);
+        
+        playBtn.addEventListener('click', parseAndPlayChords);
+        
+        lockBtn.addEventListener('click', () => {
+            isLocked = !isLocked;
+            if (isLocked) {
+                lockIcon.classList.remove('ph-unlock');
+                lockIcon.classList.add('ph-lock');
+                lockBtn.classList.add('bg-teal-500', 'hover:bg-teal-600', 'text-gray-900');
+                lockBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
+            } else {
+                lockIcon.classList.remove('ph-lock');
+                lockIcon.classList.add('ph-unlock');
+                lockBtn.classList.remove('bg-teal-500', 'hover:bg-teal-600', 'text-gray-900');
+                lockBtn.classList.add('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
+            }
+            
+            if (!isLocked && isAutoTransposeEnabled) {
+                transposeNotes();
+            }
+        });
+        
+        autoTransposeToggle.addEventListener('change', () => {
+            isAutoTransposeEnabled = autoTransposeToggle.checked;
+            if (isAutoTransposeEnabled && !isLocked) {
+                transposeNotes();
+            }
+        });
+
+        sharpBtn.addEventListener('click', () => {
+            updateNotation('sharp');
+            generateHarmonicChords();
+            searchChordLibrary();
+        });
+        flatBtn.addEventListener('click', () => {
+            updateNotation('flat');
+            generateHarmonicChords();
+            searchChordLibrary();
+        });
+        solfegeBtn.addEventListener('click', () => {
+            updateNotation('solfege');
+            generateHarmonicChords();
+            searchChordLibrary();
+        });
+
+        metronomeBtn.addEventListener('click', () => {
+            if (isMetronomeActive) {
+                stopMetronome();
+            } else {
+                Tone.start().then(() => {
+                    startMetronome();
+                });
+            }
+        });
+
+        tempoSlider.addEventListener('input', () => {
+            updateMetronomeUI();
+            if (isMetronomeActive) {
+                stopMetronome();
+                startMetronome();
+            }
+        });
+        
+        decreaseMetronomeTempoBtn.addEventListener('click', () => {
+            let currentTempo = parseInt(tempoSlider.value, 10);
+            if (currentTempo > 40) {
+                tempoSlider.value = currentTempo - 1;
+                updateMetronomeUI();
+                if (isMetronomeActive) {
+                    stopMetronome();
+                    startMetronome();
+                }
+            }
+        });
+        
+        increaseMetronomeTempoBtn.addEventListener('click', () => {
+            let currentTempo = parseInt(tempoSlider.value, 10);
+            if (currentTempo < 240) {
+                tempoSlider.value = currentTempo + 1;
+                updateMetronomeUI();
+                if (isMetronomeActive) {
+                    stopMetronome();
+                    startMetronome();
+                }
+            }
+        });
+        
+        decreaseBeatBtn.addEventListener('click', () => {
+            if (beatsPerMeasure > 1) {
+                beatsPerMeasure--;
+                updateMetronomeUI();
+                if (isMetronomeActive) {
+                    stopMetronome();
+                    startMetronome();
+                }
+            }
+        });
+        
+        increaseBeatBtn.addEventListener('click', () => {
+            if (beatsPerMeasure < 16) {
+                beatsPerMeasure++;
+                updateMetronomeUI();
+                if (isMetronomeActive) {
+                    stopMetronome();
+                    startMetronome();
+                }
+            }
+        });
+
+        subdivisionSelector.addEventListener('change', () => {
+            if (isMetronomeActive) {
+                stopMetronome();
+                startMetronome();
+            }
+        });
+
+        soundSelector.addEventListener('change', () => {
+            metronomeSound = soundSelector.value;
+            if (isMetronomeActive) {
+                stopMetronome();
+                startMetronome();
+            }
+        });
+        
+        // Listener para el nuevo selector de nota
+        rootNoteSelector.addEventListener('change', generateHarmonicChords);
+
+        // Listeners para guardar/cargar
+        saveBtn.addEventListener('click', () => {
+            const name = progressionNameInput.value.trim();
+            const content = inputNotesEl.value.trim();
+            const isPublic = publicToggle.checked;
+            if (name && content) {
+                saveChordProgression(name, content, isPublic);
+            } else {
+                showMessage("El nombre y las notas no pueden estar vacíos.");
+            }
+        });
+        
+        searchProgressionsInput.addEventListener('input', filterProgressionsList);
+        
+        // Listeners para la librería de acordes
+        chordSearchInput.addEventListener('input', searchChordLibrary);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                if (!isLocked) {
+                    transposeNotes();
+                    isAutoTransposeEnabled = false;
+                    autoTransposeToggle.checked = false;
+                }
+            }
+            if (e.ctrlKey && e.key === 'm') {
+                e.preventDefault();
+                if (isMetronomeActive) {
+                    stopMetronome();
+                } else {
+                    Tone.start().then(() => {
+                        startMetronome();
+                    });
+                }
+            }
+        });
+        
+        // App initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            updateNotation('sharp'); 
+            updateMetronomeUI();
+            populateNoteSelector();
+        });
+    </script>
+</body>
+</html>
