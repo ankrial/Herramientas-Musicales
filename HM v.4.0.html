@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramientas Musicales 2025.09</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tone@14.9.11/build/Tone.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+
+        .light body {
+            background-color: #f7fafc;
+            color: #2d3748;
+        }
+
+        /* Border colors for dark/light mode */
+        .border-base {
+            border-width: 3px;
+            transition: border-color 0.3s;
+        }
+
+        .light .border-base {
+            border-color: black;
+        }
+
+        .dark .border-base {
+            border-color: white;
+        }
+        
+        /* Change from bg-slate-200 to white for modules */
+        .module-bg {
+            background-color: white;
+        }
+
+        .dark .module-bg {
+            background-color: #2d3748;
+        }
+
+        .light .bg-slate-200 {
+            background-color: #cbd5e0;
+        }
+
+        .dark .bg-slate-200 {
+            background-color: #2d3748;
+        }
+
+        /* Input and select background color */
+        .input-bg {
+            background-color: white;
+            color: black;
+        }
+
+        .dark .input-bg {
+            background-color: white;
+            color: black;
+        }
+        
+        /* Custom scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+        }
+        /* Módulo 2 */
+        .circle {
+            width: 32px; /* Increased size */
+            height: 32px; /* Increased size */
+            border-radius: 50%;
+            background-color: #94a3b8;
+            transition: background-color 0.1s;
+        }
+
+        .circle-active {
+            background-color: #38a169 !important;
+        }
+
+        .circle-first-beat {
+            background-color: #ef4444 !important; /* Red */
+        }
+
+        .dark .circle {
+            background-color: #4a5568;
+        }
+
+        .dark .circle-active {
+            background-color: #48bb78 !important;
+        }
+
+        .dark .circle-first-beat {
+            background-color: #dc2626 !important; /* Dark red */
+        }
+    </style>
+</head>
+<body class="light">
+
+    <div class="p-4 mx-auto max-w-2xl flex flex-col items-center">
+        <header class="flex justify-between items-center w-full max-w-lg mb-4">
+            <h1 class="text-3xl font-bold text-center w-full">Herramientas Musicales 2025.09</h1>
+            <button id="mode-toggle" class="p-2 rounded-full border-base">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            </button>
+        </header>
+
+        <!-- Módulo 01: Transponer Notas Musicales -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">01. Transponer Notas</h2>
+            <textarea id="input-text" class="w-full p-2 h-48 mb-4 rounded-lg input-bg border-base" placeholder="Introduce las notas musicales aquí..."></textarea>
+            <textarea id="output-text" class="w-full p-2 h-48 mb-4 rounded-lg input-bg border-base" placeholder="Notas transpuestas..." readonly></textarea>
+            
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
+                <div class="flex items-center gap-1">
+                    <button id="transpose-down" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors active:bg-cyan-400">-</button>
+                    <span id="semitone-count" class="font-bold text-lg">0</span>
+                    <button id="transpose-up" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors active:bg-cyan-400">+</button>
+                </div>
+                <button id="mode-sharp" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors active:bg-cyan-400">#</button>
+                <button id="mode-flat" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors active:bg-cyan-400">b</button>
+                <button id="mode-solfege" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors active:bg-cyan-400">Solfeo</button>
+                <button id="font-size-up" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors active:bg-cyan-400">A+</button>
+                <button id="font-size-down" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors active:bg-cyan-400">A-</button>
+                <button id="font-size-reset" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors active:bg-cyan-400">A</button>
+                <button id="copy-text" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Copiar</button>
+                <button id="reset-text" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Reiniciar</button>
+            </div>
+
+            <div class="flex flex-col gap-2 mb-4">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="history-title" class="flex-grow p-2 rounded-lg input-bg border-base" placeholder="Título del Historial">
+                    <button id="save-history" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Guardar</button>
+                </div>
+                <div class="border-base p-4 rounded-lg max-h-48 overflow-y-auto input-bg">
+                    <h3 class="text-xl font-semibold mb-2">Historial</h3>
+                    <ul id="history-list" class="space-y-2"></ul>
+                    <div class="flex justify-between items-center mt-4">
+                        <button id="load-selected" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Cargar</button>
+                        <button id="delete-selected" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Eliminar Seleccionados</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulo 02: Metrónomo -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">02. Metrónomo</h2>
+            <div class="flex flex-wrap items-center justify-center gap-4 mb-4">
+                <button id="metronome-toggle" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-colors">Iniciar</button>
+                <div class="flex items-center gap-2">
+                    <button id="bpm-down" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors">-</button>
+                    <span id="bpm-display" class="font-bold text-lg">120 BPM</span>
+                    <button id="bpm-up" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors">+</button>
+                </div>
+                <select id="time-signature" class="p-2 rounded-lg input-bg border-base">
+                    <option value="4/4">4/4</option>
+                    <option value="3/4">3/4</option>
+                    <option value="2/4">2/4</option>
+                    <option value="6/8">6/8</option>
+                </select>
+                <select id="subdivision" class="p-2 rounded-lg input-bg border-base">
+                    <option value="4n">Negras</option>
+                    <option value="8n">Corcheas</option>
+                    <option value="8t">Tresillos</option>
+                    <option value="16n">Semicorcheas</option>
+                </select>
+            </div>
+            <div id="visual-beats" class="flex justify-center gap-4 mt-4"></div>
+        </div>
+        
+        <!-- Módulo 03: Acordes y Escalas Armónicas -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">03. Acordes y Escalas</h2>
+            <div class="flex flex-wrap gap-4 justify-center mb-4">
+                <select id="scale-root" class="p-2 rounded-lg input-bg border-base"></select>
+                <select id="scale-type" class="p-2 rounded-lg input-bg border-base"></select>
+            </div>
+            <div id="scale-notes-display" class="p-4 rounded-lg border-base input-bg"></div>
+            <div id="scale-chords-display" class="p-4 rounded-lg border-base input-bg"></div>
+        </div>
+
+        <!-- Módulo 04: Arreglo de Voces -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">04. Arreglo de Voces</h2>
+            <div class="flex flex-wrap gap-4 justify-center mb-4">
+                <select id="voice-note" class="p-2 rounded-lg input-bg border-base"></select>
+                <select id="voice-chord" class="p-2 rounded-lg input-bg border-base"></select>
+                <select id="voice-type" class="p-2 rounded-lg input-bg border-base"></select>
+            </div>
+            <div id="voice-display" class="p-4 rounded-lg border-base text-center input-bg"></div>
+        </div>
+
+        <!-- Módulo 05: Pad de Sonidos de Notas -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">05. Pad de Notas</h2>
+            <div class="flex justify-center items-center gap-4 mb-4">
+                <button id="octave-down" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors">-</button>
+                <span id="octave-display" class="text-lg font-bold">Octava: 4</span>
+                <button id="octave-up" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors">+</button>
+            </div>
+            <div id="note-pad" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <!-- Módulo 06: Acorde Inverso -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">06. Acorde Inverso</h2>
+            <div class="flex items-center gap-2 mb-4">
+                <input type="text" id="inverse-input" class="flex-grow p-2 rounded-lg input-bg border-base" placeholder="Ej: C E G">
+                <button id="inverse-analyze" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Analizar</button>
+                <button id="inverse-reset" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" fill="none"/>
+                        <path d="M18.78 6.54c-1.25-1.25-2.88-2.12-4.66-2.58l.18 1.41c1.58.42 3.01 1.25 4.13 2.37l-1.04 1.04c-1.39-1.39-3.26-2.22-5.32-2.22s-3.93.83-5.32 2.22l-1.04-1.04c1.3-1.3 2.92-2.19 4.67-2.6v-1.42h-2v-1h5v1h-2v1.42c1.76.41 3.39 1.27 4.7 2.6l1.04-1.04zM12 21c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm-5-8h10c0-2.21-1.79-4-4-4s-4 1.79-4 4z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="inverse-display" class="p-4 rounded-lg border-base max-h-48 overflow-y-auto input-bg"></div>
+        </div>
+
+        <!-- Módulo 07: Generador de Progresiones de Ejemplo -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">07. Generador de Progresiones</h2>
+            <div class="flex flex-wrap gap-4 justify-center mb-4">
+                <select id="progression-note" class="p-2 rounded-lg input-bg border-base"></select>
+                <select id="progression-scale-type" class="p-2 rounded-lg input-bg border-base">
+                    <option value="major">Mayor</option>
+                    <option value="minor">Menor</option>
+                </select>
+            </div>
+            <div id="progression-display" class="p-4 rounded-lg border-base input-bg"></div>
+        </div>
+
+        <!-- Módulo 08: Compositor de Progresiones -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">08. Compositor de Progresiones</h2>
+            <div class="flex flex-wrap gap-4 justify-center mb-4">
+                <select id="composer-note" class="p-2 rounded-lg input-bg border-base"></select>
+                <select id="composer-scale-type" class="p-2 rounded-lg input-bg border-base">
+                    <option value="major">Mayor</option>
+                    <option value="minor">Menor Natural</option>
+                    <option value="harmonic-minor">Menor Armónica</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <button id="composer-bpm-down" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors">-</button>
+                <span id="composer-bpm-display" class="font-bold text-lg">190 BPM</span>
+                <button id="composer-bpm-up" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors">+</button>
+            </div>
+            <div id="chord-buttons" class="flex flex-wrap justify-center gap-2 my-4"></div>
+            <div id="progression-composer-display" class="p-4 rounded-lg border-base min-h-[5rem] flex flex-wrap gap-2 items-center mb-4"></div>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <button id="composer-play" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Escuchar</button>
+                <button id="composer-add-silence" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Silencio</button>
+                <button id="composer-reset" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Reiniciar</button>
+                <button id="composer-loop" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Bucle</button>
+            </div>
+        </div>
+
+        <!-- Módulo 09: Intérprete de Sonido -->
+        <div class="w-full module-bg p-6 rounded-lg shadow-lg mb-6 border-base">
+            <h2 class="text-2xl font-semibold mb-4">09. Intérprete de Sonido</h2>
+            <div class="p-4 rounded-lg input-bg border-base max-h-48 overflow-y-auto">
+                <p class="mb-2">
+                    Para esta opción se ha encontrado una mejor alternativa. Una aplicación llamada **"Chord Ai"** que puedes descargar desde tu centro de aplicaciones: Google Play u otros centros de aplicaciones. Por el momento, solo te daremos los pasos para instalar desde el Google Play para los dispositivos con Sistema Operativo Android.
+                </p>
+                <h3 class="font-bold mt-4">Pasos para descargar "Chord Ai" desde Google Play:</h3>
+                <ol class="list-decimal list-inside mb-4">
+                    <li>Abre la aplicación de Google Play Store en tu dispositivo Android.</li>
+                    <li>Usa la barra de búsqueda en la parte superior y escribe "Chord Ai".</li>
+                    <li>Selecciona la aplicación oficial en los resultados de búsqueda.</li>
+                    <li>Toca el botón **"Instalar"** y espera a que la descarga e instalación finalicen.</li>
+                    <li>Una vez instalada, toca **"Abrir"** para iniciar la aplicación.</li>
+                </ol>
+                <h3 class="font-bold">Cómo usar la App:</h3>
+                <p>
+                    Una vez abierta la aplicación, toca el micrófono para que el teléfono escuche la música. La aplicación escuchará la melodía y el ritmo, y luego te mostrará los acordes en tiempo real. Esto es muy útil para aprender canciones nuevas de oído.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const body = document.body;
+        const modeToggle = document.getElementById('mode-toggle');
+        let currentMode = 'light';
+
+        // --- Lógica del Modo Claro/Oscuro ---
+        modeToggle.addEventListener('click', () => {
+            currentMode = currentMode === 'light' ? 'dark' : 'light';
+            body.className = currentMode;
+            modeToggle.innerHTML = currentMode === 'dark' ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>` : 
+                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        });
+
+        // --- Módulo 01: Transponer Notas Musicales ---
+        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const solfege = ["Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+        let semitones = 0;
+        let mode = 'sharp'; // sharp, flat, solfege
+
+        const semitoneCount = document.getElementById('semitone-count');
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const copyBtn = document.getElementById('copy-text');
+        const resetBtn = document.getElementById('reset-text');
+        const modeSharpBtn = document.getElementById('mode-sharp');
+        const modeFlatBtn = document.getElementById('mode-flat');
+        const modeSolfegeBtn = document.getElementById('mode-solfege');
+
+        const transpose = () => {
+            const input = inputText.value;
+            const lines = input.split('\n');
+            let transposedLines = [];
+
+            lines.forEach(line => {
+                let parts = line.split(':');
+                let prefix = parts.length > 1 ? parts[0] + ': ' : '';
+                let content = parts.length > 1 ? parts.slice(1).join(':') : parts[0];
+
+                const transposedContent = content.split(/(\s+|-|_|\/|\*|\(|\)|\[|\]|{|}|\d+)/).map(part => {
+                    const originalPart = part.trim();
+                    if (!originalPart) return part;
+
+                    const match = originalPart.match(/^([CDEFGABcdefgab][b#m7]?[b#m7]?_?[a-z#b]*)(.*)/);
+                    if (!match) return part;
+
+                    let [fullMatch, notePart, restPart] = match;
+                    let transposedNote = notePart;
+
+                    const noteRegex = /([CDEFGAB])([#b]?)(.*)/;
+                    const noteMatch = notePart.match(noteRegex);
+                    
+                    if (noteMatch) {
+                        let baseNote = noteMatch[1].toUpperCase();
+                        let accidental = noteMatch[2];
+                        let remainder = noteMatch[3];
+                        
+                        let baseIndex = notes.indexOf(baseNote);
+                        if (accidental === '#') baseIndex++;
+                        if (accidental === 'b') baseIndex--;
+                        if (baseIndex < 0) baseIndex = notes.length - 1;
+                        if (baseIndex >= notes.length) baseIndex = 0;
+
+                        let newIndex = (baseIndex + semitones + notes.length * 2) % notes.length;
+                        let newBaseNote = notes[newIndex];
+                        
+                        // Handle mode logic for sharps/flats/solfege
+                        if (mode === 'flat') {
+                            if (newBaseNote === 'C#') newBaseNote = 'Db';
+                            if (newBaseNote === 'D#') newBaseNote = 'Eb';
+                            if (newBaseNote === 'F#') newBaseNote = 'Gb';
+                            if (newBaseNote === 'G#') newBaseNote = 'Ab';
+                            if (newBaseNote === 'A#') newBaseNote = 'Bb';
+                        }
+                        if (mode === 'solfege') {
+                            newBaseNote = solfege[newIndex];
+                        }
+                        
+                        transposedNote = newBaseNote + remainder;
+                    }
+                    
+                    return part.replace(notePart, transposedNote);
+
+                }).join('');
+                transposedLines.push(prefix + transposedContent);
+            });
+            
+            outputText.value = transposedLines.join('\n');
+        };
+
+        document.getElementById('transpose-up').addEventListener('click', () => { semitones++; semitoneCount.textContent = semitones; transpose(); });
+        document.getElementById('transpose-down').addEventListener('click', () => { semitones--; semitoneCount.textContent = semitones; transpose(); });
+        inputText.addEventListener('input', () => { transpose(); });
+
+        modeSharpBtn.addEventListener('click', () => { mode = 'sharp'; transpose(); });
+        modeFlatBtn.addEventListener('click', () => { mode = 'flat'; transpose(); });
+        modeSolfegeBtn.addEventListener('click', () => { mode = 'solfege'; transpose(); });
+
+        document.getElementById('font-size-up').addEventListener('click', () => {
+            let currentSize = parseFloat(getComputedStyle(outputText).fontSize);
+            outputText.style.fontSize = `${currentSize + 2}px`;
+        });
+        document.getElementById('font-size-down').addEventListener('click', () => {
+            let currentSize = parseFloat(getComputedStyle(outputText).fontSize);
+            outputText.style.fontSize = `${Math.max(10, currentSize - 2)}px`;
+        });
+        document.getElementById('font-size-reset').addEventListener('click', () => {
+            outputText.style.fontSize = `16px`;
+        });
+        copyBtn.addEventListener('click', () => {
+            outputText.select();
+            document.execCommand('copy');
+        });
+        resetBtn.addEventListener('click', () => {
+            inputText.value = '';
+            outputText.value = '';
+            semitones = 0;
+            semitoneCount.textContent = semitones;
+            outputText.style.fontSize = `16px`;
+            Tone.Transport.stop();
+        });
+        
+        // Historial
+        const historyList = document.getElementById('history-list');
+        const historyTitleInput = document.getElementById('history-title');
+
+        const loadHistory = () => {
+            const history = JSON.parse(localStorage.getItem('musical_tools_history')) || [];
+            historyList.innerHTML = '';
+            history.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2 text-sm';
+                li.innerHTML = `
+                    <input type="checkbox" data-index="${index}" class="form-checkbox rounded">
+                    <span class="flex-grow">${item.date} - ${item.title}: ${item.firstLine}</span>
+                `;
+                historyList.appendChild(li);
+            });
+        };
+
+        document.getElementById('save-history').addEventListener('click', () => {
+            const history = JSON.parse(localStorage.getItem('musical_tools_history')) || [];
+            const title = historyTitleInput.value || 'Sin Título';
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const firstLine = inputText.value.split('\n')[0].substring(0, 30);
+            
+            history.push({ date, title, content: inputText.value, firstLine });
+            localStorage.setItem('musical_tools_history', JSON.stringify(history));
+            historyTitleInput.value = '';
+            loadHistory();
+        });
+
+        document.getElementById('load-selected').addEventListener('click', () => {
+            const history = JSON.parse(localStorage.getItem('musical_tools_history')) || [];
+            const selected = Array.from(document.querySelectorAll('#history-list input:checked')).map(cb => cb.dataset.index);
+            if (selected.length === 1) {
+                inputText.value = history[selected[0]].content;
+                transpose();
+            } else if (selected.length > 1) {
+                const combinedContent = selected.map(index => history[index].content).join('\n\n');
+                inputText.value = combinedContent;
+                transpose();
+            }
+        });
+
+        document.getElementById('delete-selected').addEventListener('click', () => {
+            let history = JSON.parse(localStorage.getItem('musical_tools_history')) || [];
+            const selectedIndices = Array.from(document.querySelectorAll('#history-list input:checked'))
+                .map(cb => parseInt(cb.dataset.index))
+                .sort((a, b) => b - a);
+
+            selectedIndices.forEach(index => history.splice(index, 1));
+            localStorage.setItem('musical_tools_history', JSON.stringify(history));
+            loadHistory();
+        });
+        
+        loadHistory();
+
+        // --- Módulo 02: Metrónomo ---
+        let isPlaying = false;
+        let metronome;
+        let beatCount = 0;
+        const bpmDisplay = document.getElementById('bpm-display');
+        const beatsContainer = document.getElementById('visual-beats');
+        
+        const setupMetronome = () => {
+            if (metronome) metronome.dispose();
+
+            const timeSignature = document.getElementById('time-signature').value;
+            const subdivision = document.getElementById('subdivision').value;
+            const [beats, noteValue] = timeSignature.split('/');
+
+            Tone.Transport.bpm.value = parseInt(bpmDisplay.textContent);
+
+            beatsContainer.innerHTML = '';
+            for (let i = 0; i < parseInt(beats); i++) {
+                const circle = document.createElement('div');
+                circle.className = 'circle';
+                beatsContainer.appendChild(circle);
+            }
+
+            const beatCircles = beatsContainer.querySelectorAll('.circle');
+            
+            metronome = new Tone.Loop(time => {
+                const beat = beatCount % parseInt(beats);
+                
+                // Visual feedback
+                beatCircles.forEach(circle => circle.classList.remove('circle-active', 'circle-first-beat'));
+                beatCircles[beat].classList.add('circle-active');
+                if (beat === 0) beatCircles[0].classList.add('circle-first-beat');
+
+                // Sound
+                const synth = new Tone.MembraneSynth().toDestination();
+                if (beat === 0) {
+                    synth.triggerAttackRelease("C4", "8n", time);
+                } else {
+                    synth.triggerAttackRelease("C3", "8n", time);
+                }
+                
+                beatCount++;
+            }, subdivision);
+        };
+        
+        document.getElementById('metronome-toggle').addEventListener('click', () => {
+            if (Tone.Transport.state !== 'started') {
+                Tone.start();
+                setupMetronome();
+                metronome.start(0);
+                Tone.Transport.start();
+                document.getElementById('metronome-toggle').textContent = 'Detener';
+            } else {
+                Tone.Transport.stop();
+                if (metronome) {
+                    metronome.stop();
+                    metronome.dispose();
+                }
+                beatCount = 0;
+                beatsContainer.querySelectorAll('.circle').forEach(circle => circle.classList.remove('circle-active', 'circle-first-beat'));
+                document.getElementById('metronome-toggle').textContent = 'Iniciar';
+            }
+        });
+
+        document.getElementById('bpm-up').addEventListener('click', () => {
+            let bpm = parseInt(bpmDisplay.textContent);
+            if (bpm < 240) {
+                bpm++;
+                bpmDisplay.textContent = `${bpm} BPM`;
+                if (Tone.Transport.state === 'started') Tone.Transport.bpm.value = bpm;
+            }
+        });
+        document.getElementById('bpm-down').addEventListener('click', () => {
+            let bpm = parseInt(bpmDisplay.textContent);
+            if (bpm > 40) {
+                bpm--;
+                bpmDisplay.textContent = `${bpm} BPM`;
+                if (Tone.Transport.state === 'started') Tone.Transport.bpm.value = bpm;
+            }
+        });
+
+        // --- Módulo 03: Acordes y Escalas Armónicas ---
+        const scaleRootSelect = document.getElementById('scale-root');
+        const scaleTypeSelect = document.getElementById('scale-type');
+        const scaleNotesDisplay = document.getElementById('scale-notes-display');
+        const scaleChordsDisplay = document.getElementById('scale-chords-display');
+
+        const notesFull = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const scalesData = {
+            // Modos Mayores y Relativos
+            "Mayor (Jónica)": { intervals: [0, 2, 4, 5, 7, 9, 11], chords: ["Mayor", "menor", "menor", "Mayor", "Séptima Dominante", "menor", "disminuido"] },
+            "Menor Natural (Eólica)": { intervals: [0, 2, 3, 5, 7, 8, 10], chords: ["menor", "disminuido", "Mayor", "menor", "menor", "Mayor", "Mayor"] },
+            "Menor Dórica": { intervals: [0, 2, 3, 5, 7, 9, 10], chords: ["menor", "menor", "Mayor", "Mayor", "Séptima Dominante", "disminuido", "menor"] },
+            "Menor Frigia": { intervals: [0, 1, 3, 5, 7, 8, 10], chords: ["menor", "Mayor", "Mayor", "menor", "disminuido", "Mayor", "menor"] },
+            "Lidia": { intervals: [0, 2, 4, 6, 7, 9, 11], chords: ["Mayor", "Séptima Dominante", "menor", "disminuido", "Mayor", "menor", "menor"] },
+            "Mixolidia": { intervals: [0, 2, 4, 5, 7, 9, 10], chords: ["Mayor", "menor", "disminuido", "Mayor", "menor", "menor", "Séptima Dominante"] },
+            "Locria": { intervals: [0, 1, 3, 5, 6, 8, 10], chords: ["disminuido", "Mayor", "menor", "Mayor", "menor", "disminuido", "menor"] },
+
+            // Otras Escalas
+            "Menor Armónica": { intervals: [0, 2, 3, 5, 7, 8, 11], chords: ["menor", "disminuido", "aumentado", "menor", "Séptima Dominante", "Mayor", "disminuido"] },
+            "Menor Melódica": { intervals: [0, 2, 3, 5, 7, 9, 11], chords: ["menor", "menor", "aumentado", "Séptima Dominante", "Séptima Dominante", "disminuido", "disminuido"] },
+            "Pentatónica Mayor": { intervals: [0, 2, 4, 7, 9], chords: null },
+            "Pentatónica Menor": { intervals: [0, 3, 5, 7, 10], chords: null },
+            "Blues": { intervals: [0, 3, 5, 6, 7, 10], chords: null },
+            "Cromática": { intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], chords: null },
+            "Séptimas": { intervals: null, chords: null },
+            "Disonantes": { intervals: null, chords: null },
+        };
+        const chordQualitiesData = {
+            "Mayor": [0, 4, 7], "menor": [0, 3, 7], "Séptima Dominante": [0, 4, 7, 10], "disminuido": [0, 3, 6], "aumentado": [0, 4, 8],
+            "sus2": [0, 2, 7], "sus4": [0, 5, 7], "add9": [0, 4, 7, 14],
+        };
+        const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii°"];
+
+        notesFull.forEach(note => {
+            const option = document.createElement('option');
+            option.value = note;
+            option.textContent = note;
+            scaleRootSelect.appendChild(option);
+        });
+
+        Object.keys(scalesData).forEach(scaleName => {
+            const option = document.createElement('option');
+            option.value = scaleName;
+            option.textContent = scaleName;
+            scaleTypeSelect.appendChild(option);
+        });
+
+        const getScaleNotes = (root, intervals) => {
+            const rootIndex = notesFull.indexOf(root);
+            return intervals.map(interval => notesFull[(rootIndex + interval) % notesFull.length]);
+        };
+
+        const getChordNotes = (root, type) => {
+            const rootIndex = notesFull.indexOf(root);
+            const intervals = chordQualitiesData[type] || [];
+            return intervals.map(interval => notesFull[(rootIndex + interval + 12) % notesFull.length]);
+        };
+        
+        const renderScale = () => {
+            const root = scaleRootSelect.value;
+            const type = scaleTypeSelect.value;
+            const selectedScale = scalesData[type];
+            
+            // Handle non-scale selections
+            if (!selectedScale.intervals) {
+                scaleNotesDisplay.innerHTML = `<h3 class="font-bold text-lg mb-2">Acordes y Escalas</h3>
+                <p>Las opciones de "Séptimas" y "Disonantes" no son escalas, sino tipos de acordes. Puedes explorarlos en el módulo 04 "Arreglo de Voces" y el 06 "Acorde Inverso".</p>`;
+                scaleChordsDisplay.innerHTML = '';
+                return;
+            }
+
+            const scaleNotes = getScaleNotes(root, selectedScale.intervals);
+            
+            scaleNotesDisplay.innerHTML = `
+                <h3 class="font-bold text-lg mb-2">Notas de la Escala: ${root} ${type}</h3>
+                <p>${scaleNotes.join(', ')}</p>
+            `;
+            
+            scaleChordsDisplay.innerHTML = '';
+            if (selectedScale.chords) {
+                scaleChordsDisplay.innerHTML += `<h3 class="font-bold text-lg mb-2">Acordes de la Escala</h3>`;
+                selectedScale.chords.forEach((quality, index) => {
+                    const chordRoot = scaleNotes[index];
+                    const chordNotes = getChordNotes(chordRoot, quality);
+                    scaleChordsDisplay.innerHTML += `
+                        <div class="mb-2 p-2 rounded-lg input-bg">
+                            <p class="font-semibold">${romanNumerals[index]} (${quality})</p>
+                            <p><strong>Nota Base:</strong> ${chordRoot}</p>
+                            <p><strong>Notas:</strong> ${chordNotes.join(', ')}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                scaleChordsDisplay.innerHTML += `<p>No hay acordes predefinidos para esta escala.</p>`;
+            }
+        };
+
+        scaleRootSelect.addEventListener('change', renderScale);
+        scaleTypeSelect.addEventListener('change', renderScale);
+        renderScale();
+
+        // --- Módulo 04: Arreglo de Voces ---
+        const voiceNoteSelect = document.getElementById('voice-note');
+        const voiceChordSelect = document.getElementById('voice-chord');
+        const voiceTypeSelect = document.getElementById('voice-type');
+        const voiceDisplay = document.getElementById('voice-display');
+
+        const voiceChordsData = {
+            "Mayor": [0, 4, 7], "Menor": [0, 3, 7],
+            "Séptima Dominante": [0, 4, 7, 10], "Séptima Mayor": [0, 4, 7, 11], "Séptima Menor": [0, 3, 7, 10],
+            "Disminuido": [0, 3, 6], "Aumentado": [0, 4, 8],
+            "sus2": [0, 2, 7], "sus4": [0, 5, 7], "add9": [0, 4, 7, 14],
+        };
+
+        const voiceTypesData = {
+            "Voz Principal": { intervals: [0] },
+            "Segunda Voz (Tercera)": { intervals: [4] },
+            "Tercera Voz (Quinta)": { intervals: [7] },
+            "Tercera Voz (Séptima)": { intervals: [10] }
+        };
+
+        notesFull.forEach(note => {
+            const option = document.createElement('option');
+            option.value = note;
+            option.textContent = note;
+            voiceNoteSelect.appendChild(option);
+        });
+        
+        Object.keys(voiceChordsData).forEach(chordName => {
+            const option = document.createElement('option');
+            option.value = chordName;
+            option.textContent = chordName;
+            voiceChordSelect.appendChild(option);
+        });
+
+        Object.keys(voiceTypesData).forEach(voiceName => {
+            const option = document.createElement('option');
+            option.value = voiceName;
+            option.textContent = voiceName;
+            voiceTypeSelect.appendChild(option);
+        });
+
+        const getVoiceNotes = (root, chordType, voiceType) => {
+            const rootIndex = notesFull.indexOf(root);
+            const intervals = voiceChordsData[chordType];
+            const voiceIntervals = voiceTypesData[voiceType].intervals;
+
+            const getNote = (interval) => notesFull[(rootIndex + interval + 12) % 12];
+
+            const voiceNote = getNote(voiceIntervals[0]);
+            
+            const chordNotes = intervals.map(getNote);
+            
+            return {
+                voiceNote,
+                chordNotes
+            };
+        };
+
+        const renderVoices = () => {
+            const root = voiceNoteSelect.value;
+            const chordType = voiceChordSelect.value;
+            const voiceType = voiceTypeSelect.value;
+            
+            const { voiceNote, chordNotes } = getVoiceNotes(root, chordType, voiceType);
+
+            voiceDisplay.innerHTML = `
+                <div class="mb-2 p-2 rounded-lg input-bg">
+                    <p class="font-bold text-center">Nota Principal: ${root}</p>
+                    <p class="font-bold text-center">Tipo de Acorde: ${chordType}</p>
+                    <p class="font-bold text-center">Voz Seleccionada: ${voiceType}</p>
+                </div>
+                <div class="flex flex-col items-center p-2 rounded-lg input-bg">
+                    <p class="font-semibold text-xl my-2">Notas del Acorde</p>
+                    ${chordNotes.map(note => `<span class="text-lg">${note}</span>`).join('')}
+                    <div class="my-4 w-full h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                    <p class="font-semibold text-xl my-2">Nota de la Voz</p>
+                    <span class="text-xl font-bold text-red-500 dark:text-red-400">${voiceNote}</span>
+                </div>
+            `;
+        };
+
+        voiceNoteSelect.addEventListener('change', renderVoices);
+        voiceChordSelect.addEventListener('change', renderVoices);
+        voiceTypeSelect.addEventListener('change', renderVoices);
+        renderVoices();
+        
+        // --- Módulo 05: Pad de Sonidos de Notas ---
+        const notePad = document.getElementById('note-pad');
+        const octaveDisplay = document.getElementById('octave-display');
+        let currentOctave = 4;
+        const notePadNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+
+        const renderNotePad = () => {
+            notePad.innerHTML = '';
+            notePadNotes.forEach(note => {
+                const button = document.createElement('button');
+                const colorMap = {
+                    "C": "bg-red-500", "C#": "bg-red-700", "D": "bg-orange-500", "D#": "bg-orange-700",
+                    "E": "bg-yellow-500", "F": "bg-lime-500", "F#": "bg-lime-700", "G": "bg-green-500",
+                    "G#": "bg-green-700", "A": "bg-blue-500", "A#": "bg-blue-700", "B": "bg-purple-500",
+                };
+                button.className = `p-4 rounded-lg font-bold text-white transition-colors hover:scale-105 active:scale-95 ${colorMap[note]}`;
+                button.textContent = note;
+                button.addEventListener('mousedown', () => {
+                    synth.triggerAttack(`${note}${currentOctave}`);
+                });
+                button.addEventListener('mouseup', () => {
+                    synth.triggerRelease(`${note}${currentOctave}`);
+                });
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    synth.triggerAttack(`${note}${currentOctave}`);
+                });
+                button.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    synth.triggerRelease(`${note}${currentOctave}`);
+                });
+                notePad.appendChild(button);
+            });
+        };
+
+        document.getElementById('octave-up').addEventListener('click', () => {
+            if (currentOctave < 6) currentOctave++;
+            octaveDisplay.textContent = `Octava: ${currentOctave}`;
+        });
+        document.getElementById('octave-down').addEventListener('click', () => {
+            if (currentOctave > 1) currentOctave--;
+            octaveDisplay.textContent = `Octava: ${currentOctave}`;
+        });
+
+        renderNotePad();
+
+        // --- Módulo 06: Acorde Inverso ---
+        const inverseInput = document.getElementById('inverse-input');
+        const inverseAnalyzeBtn = document.getElementById('inverse-analyze');
+        const inverseResetBtn = document.getElementById('inverse-reset');
+        const inverseDisplay = document.getElementById('inverse-display');
+
+        const allChords = {
+            // Mayores
+            "C Mayor": ["C", "E", "G"], "C# Mayor": ["C#", "E#", "G#"], "Db Mayor": ["Db", "F", "Ab"], "D Mayor": ["D", "F#", "A"], "D# Mayor": ["D#", "G", "A#"], "Eb Mayor": ["Eb", "G", "Bb"], "E Mayor": ["E", "G#", "B"], "F Mayor": ["F", "A", "C"], "F# Mayor": ["F#", "A#", "C#"], "Gb Mayor": ["Gb", "Bb", "Db"], "G Mayor": ["G", "B", "D"], "G# Mayor": ["G#", "B#", "D#"], "Ab Mayor": ["Ab", "C", "Eb"], "A Mayor": ["A", "C#", "E"], "A# Mayor": ["A#", "C##", "E#"], "Bb Mayor": ["Bb", "D", "F"], "B Mayor": ["B", "D#", "F#"],
+            // Menores
+            "C Menor": ["C", "D#", "G"], "C# Menor": ["C#", "E", "G#"], "Db Menor": ["Db", "E", "Ab"], "D Menor": ["D", "F", "A"], "D# Menor": ["D#", "F#", "A#"], "Eb Menor": ["Eb", "Gb", "Bb"], "E Menor": ["E", "G", "B"], "F Menor": ["F", "G#", "C"], "F# Menor": ["F#", "A", "C#"], "Gb Menor": ["Gb", "A", "Db"], "G Menor": ["G", "A#", "D"], "G# Menor": ["G#", "B", "D#"], "Ab Menor": ["Ab", "B", "Eb"], "A Menor": ["A", "C", "E"], "A# Menor": ["A#", "C#", "E#"], "Bb Menor": ["Bb", "Db", "F"], "B Menor": ["B", "D", "F#"],
+            // Séptimas Dominantes
+            "C Séptima": ["C", "E", "G", "A#"], "C# Séptima": ["C#", "E#", "G#", "B"], "Db Séptima": ["Db", "F", "Ab", "B"], "D Séptima": ["D", "F#", "A", "C"], "D# Séptima": ["D#", "G", "A#", "C#"], "Eb Séptima": ["Eb", "G", "Bb", "Db"], "E Séptima": ["E", "G#", "B", "D"], "F Séptima": ["F", "A", "C", "D#"], "F# Séptima": ["F#", "A#", "C#", "E"], "G Séptima": ["G", "B", "D", "F"], "G# Séptima": ["G#", "B#", "D#", "F#"], "A Séptima": ["A", "C#", "E", "G"], "A# Séptima": ["A#", "C##", "E#", "G#"], "Bb Séptima": ["Bb", "D", "F", "Ab"], "B Séptima": ["B", "D#", "F#", "A"],
+            // Séptimas Mayores
+            "C Mayor Séptima": ["C", "E", "G", "B"], "C# Mayor Séptima": ["C#", "E#", "G#", "B#"], "Db Mayor Séptima": ["Db", "F", "Ab", "C"], "D Mayor Séptima": ["D", "F#", "A", "C#"], "D# Mayor Séptima": ["D#", "G", "A#", "C##"], "Eb Mayor Séptima": ["Eb", "G", "Bb", "D"], "E Mayor Séptima": ["E", "G#", "B", "D#"], "F Mayor Séptima": ["F", "A", "C", "E"], "F# Mayor Séptima": ["F#", "A#", "C#", "E#"], "Gb Mayor Séptima": ["Gb", "Bb", "Db", "F"], "G Mayor Séptima": ["G", "B", "D", "F#"], "G# Mayor Séptima": ["G#", "B#", "D#", "F##"], "Ab Mayor Séptima": ["Ab", "C", "Eb", "G"], "A Mayor Séptima": ["A", "C#", "E", "G#"], "A# Mayor Séptima": ["A#", "C##", "E#", "G##"], "Bb Mayor Séptima": ["Bb", "D", "F", "A"], "B Mayor Séptima": ["B", "D#", "F#", "A#"],
+            // Menores Séptimas
+            "C Menor Séptima": ["C", "Eb", "G", "Bb"], "C# Menor Séptima": ["C#", "E", "G#", "B"], "Db Menor Séptima": ["Db", "E", "Ab", "B"], "D Menor Séptima": ["D", "F", "A", "C"], "D# Menor Séptima": ["D#", "F#", "A#", "C#"], "Eb Menor Séptima": ["Eb", "Gb", "Bb", "Db"], "E Menor Séptima": ["E", "G", "B", "D"], "F Menor Séptima": ["F", "Ab", "C", "Eb"], "F# Menor Séptima": ["F#", "A", "C#", "E"], "G Menor Séptima": ["G", "Bb", "D", "F"], "G# Menor Séptima": ["G#", "B", "D#", "F#"], "Ab Menor Séptima": ["Ab", "B", "Eb", "Gb"], "A Menor Séptima": ["A", "C", "E", "G"], "A# Menor Séptima": ["A#", "C#", "E#", "G#"], "Bb Menor Séptima": ["Bb", "Db", "F", "Ab"], "B Menor Séptima": ["B", "D", "F#", "A"],
+            // Disminuidos
+            "C Disminuido": ["C", "Eb", "Gb"], "C# Disminuido": ["C#", "E", "G"], "Db Disminuido": ["Db", "Fb", "Abb"], "D Disminuido": ["D", "F", "Ab"], "D# Disminuido": ["D#", "F#", "A"], "Eb Disminuido": ["Eb", "Gb", "Abb"], "E Disminuido": ["E", "G", "Bb"], "F Disminuido": ["F", "Ab", "B"], "F# Disminuido": ["F#", "A", "C"], "Gb Disminuido": ["Gb", "Bbb", "Dbb"], "G Disminuido": ["G", "Bb", "Db"], "G# Disminuido": ["G#", "B", "D"], "Ab Disminuido": ["Ab", "Cbb", "Ebb"], "A Disminuido": ["A", "C", "Eb"], "A# Disminuido": ["A#", "C#", "E"], "Bb Disminuido": ["Bb", "Db", "Fb"], "B Disminuido": ["B", "D", "F"],
+            // Aumentados
+            "C Aumentado": ["C", "E", "G#"], "C# Aumentado": ["C#", "E#", "G##"], "Db Aumentado": ["Db", "F", "A"], "D Aumentado": ["D", "F#", "A#"], "D# Aumentado": ["D#", "G", "B"], "Eb Aumentado": ["Eb", "G", "B"], "E Aumentado": ["E", "G#", "C##"], "F Aumentado": ["F", "A", "C#"], "F# Aumentado": ["F#", "A#", "C##"], "Gb Aumentado": ["Gb", "Bb", "D"], "G Aumentado": ["G", "B", "D#"], "G# Aumentado": ["G#", "B#", "D##"], "Ab Aumentado": ["Ab", "C", "E"], "A Aumentado": ["A", "C#", "E#"], "A# Aumentado": ["A#", "C##", "E##"], "Bb Aumentado": ["Bb", "D", "F#"], "B Aumentado": ["B", "D#", "F##"],
+            // Sus2
+            "C sus2": ["C", "D", "G"], "C# sus2": ["C#", "D#", "G#"], "D sus2": ["D", "E", "A"], "D# sus2": ["D#", "F", "A#"], "E sus2": ["E", "F#", "B"], "F sus2": ["F", "G", "C"], "F# sus2": ["F#", "G#", "C#"], "G sus2": ["G", "A", "D"], "G# sus2": ["G#", "A#", "D#"], "A sus2": ["A", "B", "E"], "A# sus2": ["A#", "C", "E#"], "B sus2": ["B", "C#", "F#"],
+            // Sus4
+            "C sus4": ["C", "F", "G"], "C# sus4": ["C#", "F#", "G#"], "D sus4": ["D", "G", "A"], "D# sus4": ["D#", "G#", "A#"], "E sus4": ["E", "A", "B"], "F sus4": ["F", "A#", "C"], "F# sus4": ["F#", "B", "C#"], "G sus4": ["G", "C", "D"], "G# sus4": ["G#", "C#", "D#"], "A sus4": ["A", "D", "E"], "A# sus4": ["A#", "D#", "E#"], "B sus4": ["B", "D#", "F#"],
+            // Añadir más acordes aquí si es necesario
+        };
+        
+        const noteToPitchClassMap = {
+            'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'Fb': 4, 'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11, 'Cb': 11,
+            'E#': 5, 'B#': 0, 'C##': 2, 'D##': 4, 'F##': 7, 'G##': 9, 'A##': 11,
+            'Dbb': 0, 'Ebb': 2, 'Gbb': 5, 'Abb': 7, 'Bbb': 9, 'Cbb': 10, 'Fbb': 3
+        };
+
+        const getPitchClass = (note) => {
+            const sanitizedNote = note.trim().replace('##', 'x').replace('bb', 'y').toUpperCase();
+            return noteToPitchClassMap[sanitizedNote] !== undefined ? noteToPitchClassMap[sanitizedNote] : null;
+        };
+
+        const isSubset = (subsetArray, supersetArray) => {
+            const supersetSet = new Set(supersetArray);
+            return subsetArray.every(item => supersetSet.has(item));
+        };
+
+        inverseAnalyzeBtn.addEventListener('click', () => {
+            const inputNotes = inverseInput.value.split(/[\s,]+/).filter(Boolean).map(note => note.trim());
+            
+            if (inputNotes.length < 3 || inputNotes.length > 12) {
+                inverseDisplay.innerHTML = `<p class="text-red-500 text-center">Por favor, ingrese entre 3 y 12 notas.</p>`;
+                return;
+            }
+
+            const inputPitchClasses = Array.from(new Set(inputNotes.map(note => getPitchClass(note)).filter(pc => pc !== null))).sort();
+            const foundChords = [];
+
+            for (const chord in allChords) {
+                const chordNotes = allChords[chord];
+                const chordPitchClasses = Array.from(new Set(chordNotes.map(note => getPitchClass(note)).filter(pc => pc !== null))).sort();
+                
+                if (isSubset(chordPitchClasses, inputPitchClasses)) {
+                    foundChords.push({
+                        name: chord,
+                        notes: chordNotes.join(', ')
+                    });
+                }
+            }
+
+            if (foundChords.length > 0) {
+                let resultHTML = `<h3 class="font-bold text-lg mb-2 text-center">Acordes Posibles:</h3>`;
+                foundChords.forEach(chord => {
+                    resultHTML += `<div class="p-2 my-1 rounded-lg input-bg"><strong>${chord.name}:</strong> ${chord.notes}</div>`;
+                });
+                inverseDisplay.innerHTML = resultHTML;
+            } else {
+                inverseDisplay.innerHTML = `<p class="text-center">No se encontraron acordes con la combinación de notas ingresada.</p>`;
+            }
+        });
+        
+        inverseResetBtn.addEventListener('click', () => {
+            inverseInput.value = '';
+            inverseDisplay.innerHTML = '';
+        });
+        
+        // --- Módulo 07: Generador de Progresiones de Ejemplo ---
+        const progressionNoteSelect = document.getElementById('progression-note');
+        const progressionScaleTypeSelect = document.getElementById('progression-scale-type');
+        const progressionDisplay = document.getElementById('progression-display');
+
+        notesFull.forEach(note => {
+            const option = document.createElement('option');
+            option.value = note;
+            option.textContent = note;
+            progressionNoteSelect.appendChild(option);
+        });
+
+        const romanNumeralsMajor = ["I", "ii", "iii", "IV", "V", "vi", "vii°"];
+        const romanNumeralsMinor = ["i", "ii°", "III", "iv", "v", "VI", "VII"];
+        
+        const chordTypesMajor = ["Mayor", "menor", "menor", "Mayor", "Mayor", "menor", "disminuido"];
+        const chordTypesMinor = ["menor", "disminuido", "Mayor", "menor", "menor", "Mayor", "Mayor"];
+        const chordQualities = {
+            "Mayor": [0, 4, 7],
+            "menor": [0, 3, 7],
+            "disminuido": [0, 3, 6]
+        };
+        
+        const getProgression = () => {
+            const root = progressionNoteSelect.value;
+            const scaleType = progressionScaleTypeSelect.value;
+            const rootIndex = notesFull.indexOf(root);
+
+            let progressionChords = [];
+            let romanNumerals = [];
+            let chordTypes = [];
+            let scaleIntervals = [];
+
+            if (scaleType === 'major') {
+                scaleIntervals = [0, 2, 4, 5, 7, 9, 11];
+                romanNumerals = romanNumeralsMajor;
+                chordTypes = chordTypesMajor;
+            } else {
+                scaleIntervals = [0, 2, 3, 5, 7, 8, 10];
+                romanNumerals = romanNumeralsMinor;
+                chordTypes = chordTypesMinor;
+            }
+
+            for (let i = 0; i < scaleIntervals.length; i++) {
+                const chordRoot = notesFull[(rootIndex + scaleIntervals[i]) % 12];
+                const chordNotes = chordQualities[chordTypes[i]].map(interval => {
+                    return notesFull[(notesFull.indexOf(chordRoot) + interval) % 12];
+                });
+                progressionChords.push({
+                    roman: romanNumerals[i],
+                    type: chordTypes[i],
+                    root: chordRoot,
+                    notes: chordNotes
+                });
+            }
+
+            let resultHTML = `<h3 class="font-bold text-lg mb-2">Progresión de Acordes de ${root} ${scaleType === 'major' ? 'Mayor' : 'Menor'}</h3>`;
+            resultHTML += `<div class="flex flex-wrap gap-4 justify-center">`;
+            progressionChords.forEach(chord => {
+                resultHTML += `
+                    <div class="p-4 rounded-lg input-bg w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
+                        <p class="font-semibold text-center">${chord.roman}</p>
+                        <p class="text-xl font-bold text-center">${chord.root}${chord.type === 'menor' ? 'm' : ''}${chord.type === 'disminuido' ? 'dim' : ''}</p>
+                        <p class="text-sm text-center">(${chord.notes.join(', ')})</p>
+                    </div>
+                `;
+            });
+            resultHTML += `</div>`;
+            progressionDisplay.innerHTML = resultHTML;
+        };
+        
+        progressionNoteSelect.addEventListener('change', getProgression);
+        progressionScaleTypeSelect.addEventListener('change', getProgression);
+        getProgression();
+
+        // --- Módulo 08: Compositor de Progresiones ---
+        const composerNoteSelect = document.getElementById('composer-note');
+        const composerScaleSelect = document.getElementById('composer-scale-type');
+        const chordButtonsContainer = document.getElementById('chord-buttons');
+        const composerDisplay = document.getElementById('progression-composer-display');
+        const composerPlayBtn = document.getElementById('composer-play');
+        const composerLoopBtn = document.getElementById('composer-loop');
+        const composerBpmDisplay = document.getElementById('composer-bpm-display');
+
+        notesFull.forEach(note => {
+            const option = document.createElement('option');
+            option.value = note;
+            option.textContent = note;
+            composerNoteSelect.appendChild(option);
+        });
+
+        let currentProgression = [];
+        let loop = false;
+        let playLoop;
+        const composerSynth = new Tone.PolySynth(Tone.Synth).toDestination();
+
+        const getChordNotesForComposer = (root, type) => {
+            const rootIndex = notesFull.indexOf(root);
+            const getNote = (interval) => notesFull[(rootIndex + interval + 12) % 12];
+            
+            if (type === 'major') return [getNote(0), getNote(4), getNote(7)];
+            if (type === 'minor') return [getNote(0), getNote(3), getNote(7)];
+            if (type === 'harmonic-minor') return [getNote(0), getNote(3), getNote(7)]; // Simplified for example
+            return [];
+        };
+
+        const renderChordButtons = () => {
+            chordButtonsContainer.innerHTML = '';
+            const root = composerNoteSelect.value;
+            const scale = composerScaleSelect.value;
+
+            const intervals = scalesData[scale === 'harmonic-minor' ? 'Menor Armónica' : scale === 'major' ? 'Mayor (Jónica)' : 'Menor Natural (Eólica)'].intervals;
+            const degrees = ["I", "ii", "iii", "IV", "V", "vi", "vii°"];
+            const colors = ['#87cefa', '#add8e6', '#e0ffff', '#90ee90', '#98fb98', '#b0e0e6', '#e6e6fa'];
+
+            intervals.forEach((interval, index) => {
+                const note = notesFull[(notesFull.indexOf(root) + interval) % 12];
+                const button = document.createElement('button');
+                const chordNotes = getChordNotesForComposer(note, scale);
+                button.className = `p-2 rounded-lg font-bold text-black transition-colors border-2 border-black`;
+                button.style.backgroundColor = colors[index];
+                button.innerHTML = `
+                    <span class="block text-lg">${degrees[index]}</span>
+                    <span class="block text-sm">${note}</span>
+                    <span class="block text-xs text-gray-700">${chordNotes.join('-')}</span>
+                `;
+                button.addEventListener('click', () => {
+                    currentProgression.push({ note, type: 'chord' });
+                    renderProgressionComposer();
+                });
+                chordButtonsContainer.appendChild(button);
+            });
+        };
+        
+        const renderProgressionComposer = () => {
+            composerDisplay.innerHTML = '';
+            currentProgression.forEach((item, index) => {
+                const span = document.createElement('span');
+                span.className = 'bg-slate-300 dark:bg-slate-600 p-2 rounded-lg';
+                span.textContent = item.type === 'chord' ? item.note : 'Silencio';
+                composerDisplay.appendChild(span);
+            });
+        };
+
+        composerNoteSelect.addEventListener('change', renderChordButtons);
+        composerScaleSelect.addEventListener('change', renderChordButtons);
+        renderChordButtons();
+
+        document.getElementById('composer-bpm-up').addEventListener('click', () => {
+            let bpm = parseInt(composerBpmDisplay.textContent);
+            if (bpm < 240) {
+                bpm++;
+                composerBpmDisplay.textContent = `${bpm} BPM`;
+                Tone.Transport.bpm.value = bpm;
+            }
+        });
+
+        document.getElementById('composer-bpm-down').addEventListener('click', () => {
+            let bpm = parseInt(composerBpmDisplay.textContent);
+            if (bpm > 40) {
+                bpm--;
+                composerBpmDisplay.textContent = `${bpm} BPM`;
+                Tone.Transport.bpm.value = bpm;
+            }
+        });
+
+        composerPlayBtn.addEventListener('click', async () => {
+            await Tone.start();
+            if (playLoop) {
+                playLoop.stop();
+                playLoop.dispose();
+            }
+            let index = 0;
+            Tone.Transport.bpm.value = parseInt(composerBpmDisplay.textContent);
+            playLoop = new Tone.Loop(time => {
+                if (currentProgression.length === 0) {
+                    Tone.Transport.stop();
+                    return;
+                }
+                const item = currentProgression[index];
+                if (item.type === 'chord') {
+                    composerSynth.triggerAttackRelease(`${item.note}4`, '2n', time);
+                }
+                index = (index + 1) % currentProgression.length;
+                if (!loop && index === 0) {
+                    Tone.Transport.stop();
+                    playLoop.stop();
+                }
+            }, '1n').start(0);
+
+            Tone.Transport.start();
+        });
+
+        document.getElementById('composer-add-silence').addEventListener('click', () => {
+            currentProgression.push({ type: 'silence' });
+            renderProgressionComposer();
+        });
+
+        document.getElementById('composer-reset').addEventListener('click', () => {
+            currentProgression = [];
+            renderProgressionComposer();
+            Tone.Transport.stop();
+            if (playLoop) {
+                playLoop.stop();
+                playLoop.dispose();
+            }
+        });
+
+        composerLoopBtn.addEventListener('click', () => {
+            loop = !loop;
+            composerLoopBtn.style.backgroundColor = loop ? '#facc15' : '#e5e7eb';
+        });
+
+        // --- Módulo 09: Intérprete de Sonido ---
+        // El contenido de este módulo se encuentra directamente en el HTML.
+
+    </script>
+</body>
+</html>
