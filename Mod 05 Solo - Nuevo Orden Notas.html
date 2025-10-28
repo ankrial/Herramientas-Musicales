@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 05 - Pad de Sonidos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .module {
+            background: white;
+            border: 4px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .module h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .help-btn {
+            background: #fbbf24;
+            color: #000;
+            border: 3px solid #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .help-content {
+            display: none;
+            background: #fef3c7;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 3px solid #fbbf24;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            margin-bottom: 10px;
+            background: white;
+            color: #000;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+        .btn-green { background: #22c55e; color: #000; }
+        .btn-red { background: #ef4444; color: #fff; }
+        .btn-purple { background: #a855f7; color: #fff; }
+        .btn-blue { background: #3b82f6; color: #fff; }
+        .btn-yellow { background: #facc15; color: #000; }
+        .btn-orange { background: #f97316; color: #fff; }
+        .btn.active { background: #7dd3fc; color: #000; }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .semitone-counter {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: #e5e7eb;
+            border: 3px solid #000;
+            border-radius: 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+        .history-box {
+            background: #f3f4f6;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.5rem; }
+            .btn { padding: 10px 15px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Módulo 05: Pad de Sonidos de Notas</h1>
+        </div>
+
+        <div class="module">
+            <h2>
+                🎹 Pad de Sonidos de Notas 
+                <button class="help-btn" onclick="toggleHelp()">❓ Ayuda</button>
+            </h2>
+            
+            <div id="help-5" class="help-content">
+                <strong>Descripción:</strong> Toca notas musicales y crea secuencias.<br>
+                <strong>Uso:</strong> Selecciona octava (1-6), activa "Grabar Sonidos", toca las notas para grabar secuencia, ajusta BPM y reproduce.<br>
+                <strong>Funciones:</strong> Puedes agregar silencios, activar bucle, editar notas y guardar secuencias.
+            </div>
+            
+            <div class="controls">
+                <span style="font-weight: bold; margin-right: 5px;">Octava:</span>
+                <button class="btn btn-blue" onclick="changeOctave(-1)">-</button>
+                <span class="semitone-counter" id="octave-display">4</span>
+                <button class="btn btn-blue" onclick="changeOctave(1)">+</button>
+                <button class="btn btn-yellow" id="record-toggle" onclick="toggleRecording()">▶️ Grabar Sonidos</button>
+                <button class="btn btn-orange" onclick="addSilence()">🔇 Silencio</button>
+            </div>
+            
+            <div id="note-pad" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px;"></div>
+            
+            <div class="controls" style="margin-top: 15px;">
+                <span style="font-weight: bold; margin-right: 5px;">BPM:</span>
+                <button class="btn btn-blue" onclick="changePadBPM(-5)">-</button>
+                <span class="semitone-counter" id="pad-bpm">160</span>
+                <button class="btn btn-blue" onclick="changePadBPM(5)">+</button>
+                <button class="btn btn-green" id="play-sequence" onclick="playSequence()">▶️ Reproducir</button>
+                <button class="btn btn-purple" id="loop-toggle" onclick="toggleLoop()">🔁 Bucle</button>
+                <button class="btn btn-orange" id="edit-sequence" onclick="toggleEditMode()">🔄 Reemplazar</button>
+                <button class="btn btn-red" onclick="resetPad()">🔄 Reiniciar</button>
+            </div>
+            
+            <div id="note-sequence" style="background: #f3f4f6; border: 3px solid #000; border-radius: 10px; padding: 15px; margin-top: 15px; min-height: 150px; max-height: 300px; overflow-y: auto;"></div>
+            
+            <div style="margin-top: 15px;">
+                <input type="text" id="pad-title" placeholder="Título de secuencia...">
+                <button class="btn btn-green" onclick="savePadSequence()">💾 Guardar Secuencia</button>
+                <button class="btn btn-red" onclick="deleteSelectedPadSequences()">🗑️ Eliminar</button>
+            </div>
+            
+            <div id="pad-sequences" class="history-box"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentOctave = 4;
+        let noteSequence = [];
+        let isRecording = false;
+        let isLooping = false;
+        let padBPM = 160;
+        let isPlayingSequence = false;
+        let isEditingSequence = false;
+        let selectedNoteIndex = -1;
+        let tempEditBuffer = [];
+        let padSequences = [];
+        let playInterval = null;
+        let editingPadIndex = -1;
+        let audioContext = null;
+
+        const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C#', 'D#', 'F#', 'G#', 'A#'];
+        const noteColors = [
+            '#ff6b6b', '#ee5a6f', '#f06595', '#cc5de8',
+            '#845ef7', '#5c7cfa', '#339af0', '#22b8cf',
+            '#20c997', '#51cf66', '#94d82d', '#ffd43b'
+        ];
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function getNoteFrequency(note, octave) {
+            // Orden cromático correcto para cálculo de frecuencias
+            const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const noteIndex = chromaticScale.indexOf(note);
+            
+            if (noteIndex === -1) return 440; // Fallback
+            
+            const A4 = 440; // La4 = 440 Hz
+            // A está en índice 9 de la escala cromática
+            const semitoneOffset = (octave - 4) * 12 + (noteIndex - 9);
+            return A4 * Math.pow(2, semitoneOffset / 12);
+        }
+
+        function playNote(frequency, duration = 0.3) {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function toggleHelp() {
+            const help = document.getElementById('help-5');
+            help.style.display = help.style.display === 'none' || !help.style.display ? 'block' : 'none';
+        }
+
+        function initNotePad() {
+            const pad = document.getElementById('note-pad');
+            pad.innerHTML = '';
+            notes.forEach((note, index) => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `padding: 20px; font-size: 1.2rem; font-weight: bold; border: 3px solid #000; border-radius: 10px; cursor: pointer; transition: all 0.2s; background: ${noteColors[index]}; color: #000;`;
+                btn.textContent = note;
+                btn.onclick = () => playPadNote(note, index);
+                pad.appendChild(btn);
+            });
+        }
+
+        function changeOctave(change) {
+            currentOctave = Math.max(1, Math.min(6, currentOctave + change));
+            document.getElementById('octave-display').textContent = currentOctave;
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const btn = document.getElementById('record-toggle');
+            if (isRecording) {
+                btn.classList.add('active');
+                btn.textContent = '▶️ Grabando...';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '▶️ Grabar Sonidos';
+            }
+        }
+
+        function playPadNote(note, colorIndex) {
+            const freq = getNoteFrequency(note, currentOctave);
+            playNote(freq, 0.5);
+            if (isRecording) {
+                noteSequence.push({ note, octave: currentOctave, colorIndex });
+                renderNoteSequence();
+            } else if (isEditingSequence && selectedNoteIndex >= 0) {
+                tempEditBuffer.push({ note, octave: currentOctave, colorIndex });
+                renderNoteSequence();
+            }
+            const buttons = document.querySelectorAll('#note-pad button');
+            if (buttons[colorIndex]) {
+                buttons[colorIndex].style.transform = 'scale(1.1)';
+                buttons[colorIndex].style.boxShadow = '0 0 20px ' + noteColors[colorIndex];
+                setTimeout(() => {
+                    buttons[colorIndex].style.transform = '';
+                    buttons[colorIndex].style.boxShadow = '';
+                }, 200);
+            }
+        }
+
+        function addSilence() {
+            if (isRecording) {
+                noteSequence.push({ note: 'SILENCIO', octave: 0, colorIndex: -1 });
+                renderNoteSequence();
+            } else {
+                alert('⚠️ Activa "Grabar Sonidos" primero');
+            }
+        }
+
+        function renderNoteSequence() {
+            const container = document.getElementById('note-sequence');
+            if (noteSequence.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay notas grabadas</p>';
+                return;
+            }
+            let html = '<strong style="display: block; margin-bottom: 15px; font-size: 1.1rem;">🎵 Secuencia grabada (vertical):</strong>';
+            if (isEditingSequence) {
+                html += '<p style="color: #f97316; font-weight: bold; margin-bottom: 10px;">🔄 MODO REEMPLAZO - Selecciona una nota para cambiarla</p>';
+            }
+            for (let index = 0; index < noteSequence.length; index++) {
+                const item = noteSequence[index];
+                const isSelected = selectedNoteIndex === index;
+                let bgColor = item.colorIndex >= 0 ? noteColors[item.colorIndex] : '#666';
+                let borderColor = isSelected ? '#f97316' : '#333';
+                let boxShadow = isSelected ? '0 0 15px #f97316' : 'none';
+                html += `<div id="seq-note-${index}" style="background: ${bgColor}; color: #000; padding: 15px; margin-bottom: 8px; border-radius: 10px; border: 3px solid ${borderColor}; box-shadow: ${boxShadow}; ${isEditingSequence ? 'cursor: pointer;' : ''} font-weight: bold; font-size: 1.2rem; transition: all 0.3s; display: flex; align-items: center; justify-content: space-between;" ${isEditingSequence ? `onclick="selectNoteForEdit(${index})"` : ''}>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; min-width: 50px; text-align: center; font-size: 1rem;">#${index + 1}</span>
+                        <span style="font-size: 1.5rem; font-weight: 900;">${item.note}${item.octave > 0 ? item.octave : ''}</span>
+                    </div>`;
+                if (!isEditingSequence) {
+                    html += `<button onclick="event.stopPropagation(); removeNoteFromSequence(${index})" style="background: #ef4444; color: white; padding: 8px 15px; border-radius: 8px; font-size: 0.9rem; border: 4px solid #000; cursor: pointer; font-weight: bold;">❌ Quitar</button>`;
+                }
+                html += '</div>';
+                if (isSelected && tempEditBuffer.length > 0) {
+                    html += '<div style="margin-left: 30px; margin-bottom: 10px; padding: 12px; background: #dcfce7; border: 3px solid #10b981; border-radius: 8px;"><strong style="color: #166534;">→ Nuevas notas:</strong> ';
+                    for (let j = 0; j < tempEditBuffer.length; j++) {
+                        const newItem = tempEditBuffer[j];
+                        html += `<span style="display: inline-block; margin: 3px; padding: 8px 12px; background: ${newItem.colorIndex >= 0 ? noteColors[newItem.colorIndex] : '#666'}; color: #000; border-radius: 8px; font-weight: bold; border: 2px solid #10b981;">${newItem.note}${newItem.octave}</span>`;
+                    }
+                    html += '</div>';
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function removeNoteFromSequence(index) {
+            noteSequence.splice(index, 1);
+            renderNoteSequence();
+        }
+
+        function selectNoteForEdit(index) {
+            selectedNoteIndex = index;
+            tempEditBuffer = [];
+            renderNoteSequence();
+        }
+
+        function toggleEditMode() {
+            if (isEditingSequence) {
+                if (selectedNoteIndex >= 0 && tempEditBuffer.length > 0) {
+                    const before = noteSequence.slice(0, selectedNoteIndex);
+                    const after = noteSequence.slice(selectedNoteIndex + 1);
+                    noteSequence = [...before, ...tempEditBuffer, ...after];
+                    tempEditBuffer = [];
+                    selectedNoteIndex = -1;
+                }
+                isEditingSequence = false;
+                document.getElementById('edit-sequence').classList.remove('active');
+                document.getElementById('edit-sequence').textContent = '🔄 Reemplazar';
+            } else {
+                isEditingSequence = true;
+                selectedNoteIndex = -1;
+                tempEditBuffer = [];
+                document.getElementById('edit-sequence').classList.add('active');
+                document.getElementById('edit-sequence').textContent = '💾 Guardar Cambio';
+                if (isRecording) toggleRecording();
+            }
+            renderNoteSequence();
+        }
+
+        function changePadBPM(change) {
+            padBPM = Math.max(40, Math.min(240, padBPM + change));
+            document.getElementById('pad-bpm').textContent = padBPM;
+        }
+
+        function toggleLoop() {
+            isLooping = !isLooping;
+            document.getElementById('loop-toggle').classList.toggle('active');
+        }
+
+        function playSequence() {
+            if (isPlayingSequence) {
+                isPlayingSequence = false;
+                if (playInterval) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                }
+                const btn = document.getElementById('play-sequence');
+                btn.textContent = '▶️ Reproducir';
+                btn.classList.add('btn-green');
+                btn.classList.remove('btn-red');
+                document.querySelectorAll('[id^="seq-note-"]').forEach(el => {
+                    const index = parseInt(el.id.replace('seq-note-', ''));
+                    const item = noteSequence[index];
+                    if (item) {
+                        el.style.background = item.colorIndex >= 0 ? noteColors[item.colorIndex] : '#666';
+                        el.style.transform = '';
+                        el.style.boxShadow = 'none';
+                        el.style.border = '3px solid #333';
+                        el.style.fontSize = '1.2rem';
+                    }
+                });
+                return;
+            }
+            if (noteSequence.length === 0) {
+                alert('No hay notas en la secuencia');
+                return;
+            }
+            isPlayingSequence = true;
+            const btn = document.getElementById('play-sequence');
+            btn.textContent = '⏸️ Detener';
+            btn.classList.add('btn-red');
+            btn.classList.remove('btn-green');
+            let currentIndex = 0;
+            const playNext = () => {
+                if (!isPlayingSequence) return;
+                if (currentIndex >= noteSequence.length) {
+                    if (isLooping) {
+                        currentIndex = 0;
+                    } else {
+                        isPlayingSequence = false;
+                        if (playInterval) clearInterval(playInterval);
+                        btn.textContent = '▶️ Reproducir';
+                        btn.classList.add('btn-green');
+                        btn.classList.remove('btn-red');
+                        return;
+                    }
+                }
+                document.querySelectorAll('[id^="seq-note-"]').forEach(el => {
+                    const index = parseInt(el.id.replace('seq-note-', ''));
+                    const item = noteSequence[index];
+                    if (item) {
+                        el.style.background = item.colorIndex >= 0 ? noteColors[item.colorIndex] : '#666';
+                        el.style.transform = '';
+                        el.style.boxShadow = 'none';
+                        el.style.border = '3px solid #333';
+                        el.style.fontSize = '1.2rem';
+                    }
+                });
+                const item = noteSequence[currentIndex];
+                const noteEl = document.getElementById('seq-note-' + currentIndex);
+                if (noteEl) {
+                    noteEl.style.background = 'linear-gradient(90deg, #fbbf24, #f59e0b)';
+                    noteEl.style.transform = 'scale(1.08) translateX(10px)';
+                    noteEl.style.boxShadow = '0 0 25px #fbbf24, 0 5px 15px rgba(0,0,0,0.3)';
+                    noteEl.style.border = '5px solid #dc2626';
+                    noteEl.style.fontSize = '1.4rem';
+                    noteEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                if (item.note !== 'SILENCIO') {
+                    const freq = getNoteFrequency(item.note, item.octave);
+                    playNote(freq, 0.4);
+                }
+                currentIndex++;
+            };
+            playNext();
+            playInterval = setInterval(playNext, 60000 / padBPM);
+        }
+
+        function resetPad() {
+            noteSequence = [];
+            isRecording = false;
+            isLooping = false;
+            isPlayingSequence = false;
+            isEditingSequence = false;
+            selectedNoteIndex = -1;
+            tempEditBuffer = [];
+            currentOctave = 4;
+            padBPM = 160;
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+            }
+            document.getElementById('octave-display').textContent = currentOctave;
+            document.getElementById('pad-bpm').textContent = padBPM;
+            document.getElementById('record-toggle').classList.remove('active');
+            document.getElementById('record-toggle').textContent = '▶️ Grabar Sonidos';
+            document.getElementById('loop-toggle').classList.remove('active');
+            document.getElementById('edit-sequence').classList.remove('active');
+            document.getElementById('edit-sequence').textContent = '🔄 Reemplazar';
+            document.getElementById('play-sequence').textContent = '▶️ Reproducir';
+            document.getElementById('play-sequence').classList.add('btn-green');
+            document.getElementById('play-sequence').classList.remove('btn-red');
+            renderNoteSequence();
+        }
+
+        function savePadSequence() {
+            const title = document.getElementById('pad-title').value.trim();
+            if (!title || noteSequence.length === 0) {
+                alert('Por favor ingresa un título y crea una secuencia');
+                return;
+            }
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            padSequences.push({ id: Date.now(), date, title, sequence: [...noteSequence], bpm: padBPM });
+            document.getElementById('pad-title').value = '';
+            renderPadSequences();
+        }
+
+        function renderPadSequences() {
+            const list = document.getElementById('pad-sequences');
+            if (padSequences.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay secuencias guardadas</p>';
+                return;
+            }
+            let html = '';
+            for (let i = 0; i < padSequences.length; i++) {
+                const item = padSequences[i];
+                const isEditing = editingPadIndex === i;
+                html += `<div style="border: 4px solid #000; padding: 12px; margin-bottom: 12px; border-radius: 10px; background: #fff; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;">
+                    <input type="checkbox" id="pad-${i}" value="${i}" style="width: 20px; height: 20px;">
+                    <div>`;
+                if (isEditing) {
+                    html += `<input type="text" id="pad-edit-title-${i}" value="${item.title}" style="width: 100%; padding: 8px; border: 4px solid #a855f7; border-radius: 8px; font-weight: bold; font-size: 11pt; margin-bottom: 6px; background: #fff; color: #000;">`;
+                } else {
+                    html += `<div style="font-weight: bold; font-size: 11pt; margin-bottom: 6px;">${item.title}</div>`;
+                }
+                html += `<div style="color: #666; font-size: 0.75rem;">📅 ${item.date} | 🎵 Notas: ${item.sequence.length} | BPM: ${item.bpm}</div></div>
+                    <div style="display: flex; gap: 8px;">`;
+                if (isEditing) {
+                    html += `<button onclick="savePadTitleEdit(${i})" style="padding: 8px 16px; background: #3b82f6; color: #fff; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">💾 Guardar</button>
+                    <button onclick="cancelPadTitleEdit()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">❌</button>`;
+                } else {
+                    html += `<button onclick="startPadTitleEdit(${i})" style="padding: 8px 16px; background: #a855f7; color: #fff; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">✏️ Editar</button>
+                    <button onclick="loadPadSequence(${i})" style="padding: 8px 16px; background: #22c55e; color: #000; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cargar</button>`;
+                }
+                html += `</div></div>`;
+            }
+            list.innerHTML = html;
+        }
+
+        function startPadTitleEdit(index) {
+            editingPadIndex = index;
+            renderPadSequences();
+            setTimeout(() => {
+                const input = document.getElementById('pad-edit-title-' + index);
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function savePadTitleEdit(index) {
+            const input = document.getElementById('pad-edit-title-' + index);
+            const newTitle = input.value.trim();
+            if (!newTitle) {
+                alert('❌ El título no puede estar vacío');
+                return;
+            }
+            padSequences[index].title = newTitle;
+            padSequences[index].date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            editingPadIndex = -1;
+            renderPadSequences();
+        }
+
+        function cancelPadTitleEdit() {
+            editingPadIndex = -1;
+            renderPadSequences();
+        }
+
+        function loadPadSequence(index) {
+            const item = padSequences[index];
+            noteSequence = [...item.sequence];
+            padBPM = item.bpm;
+            document.getElementById('pad-bpm').textContent = padBPM;
+            renderNoteSequence();
+        }
+
+        function deleteSelectedPadSequences() {
+            const checkboxes = document.querySelectorAll('[id^="pad-"]:checked');
+            const indices = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => b - a);
+            indices.forEach(index => padSequences.splice(index, 1));
+            renderPadSequences();
+        }
+
+        window.onload = function() {
+            initNotePad();
+            renderNoteSequence();
+            renderPadSequences();
+        };
+    </script>
+</body>
+</html>

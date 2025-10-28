@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramientas Musicales 2025.10</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            padding: 20px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        body.light { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; }
+        body.dark {  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        body.dark .container { background: rgba(30, 30, 30, 0.95); }
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        body.dark h1 {
+            background: linear-gradient(45deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 10px 20px;
+            border: 3px solid;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        body.light .theme-toggle { background: #fff; color: #333; border-color: #000; }
+        body.dark .theme-toggle {  background: #333; color: #fff; border-color: #fff; }
+        .module {
+            background: white;
+            border: 4px solid;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        body.light .module { border-color: #000; }
+        body.dark .module { background: #2a2a2a; border-color: #fff; }
+        .module h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        body.dark .module h2 { color: #60a5fa; }
+        .help-btn {
+            background: #fbbf24;
+            color: #000;
+            border: 3px solid #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        body.dark .help-btn { border-color: #fff; }
+        .help-content {
+            display: none;
+            background: #fef3c7;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 3px solid #fbbf24;
+        }
+        body.dark .help-content { background: #3a3a00; color: #fff; border-color: #fbbf24; }
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            margin-bottom: 10px;
+            background: white;
+            color: #000;
+        }
+        body.light textarea, body.light input[type="text"], body.light select { border-color: #000; }
+        body.dark textarea, body.dark input[type="text"], body.dark select { border-color: #fff; }
+        .btn {
+            padding: 12px 24px;
+            border: 3px solid;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        body.light .btn { border-color: #000; }
+        body.dark .btn { border-color: #fff; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+        .btn-green { background: #22c55e; color: #000; }
+        .btn-red { background: #ef4444; color: #fff; }
+        .btn-purple { background: #a855f7; color: #fff; }
+        .btn-blue { background: #3b82f6; color: #fff; }
+		.btn-yellow { background: #facc15; color: #000; }
+        .btn-orange { background: #f97316; color: #fff; }
+        .btn.active { background: #7dd3fc; color: #000; }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .semitone-counter {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: #e5e7eb;
+            border: 3px solid #000;
+            border-radius: 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+        body.dark .semitone-counter { background: #4b5563; border-color: #fff; }
+        .history-box {
+            background: #f3f4f6;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        body.dark .history-box { background: #374151; border-color: #fff; }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.5rem; }
+            .theme-toggle { position: static; margin: 10px auto; display: block; width: fit-content; }
+            .btn { padding: 10px 15px; font-size: 0.9rem; }
+			.chord-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        }
+		
+		/* Estilos para Módulo 08: Compositor de Progresiones */
+		.chord-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+			gap: 10px;
+			margin-top: 15px;
+			margin-bottom: 15px;
+		}
+		.chord-btn {
+			padding: 15px 10px;
+			border: 4px solid #000;
+			border-radius: 12px;
+			cursor: pointer;
+			font-weight: bold;
+			font-size: 1rem;
+			transition: all 0.3s;
+			text-align: center;
+			color: #000;
+		}
+		.chord-btn:hover {
+			transform: scale(1.05);
+			box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+		}
+		.progression-display {
+			background: #f3f4f6;
+			border: 3px solid #000;
+			border-radius: 10px;
+			padding: 15px;
+			margin-top: 15px;
+			min-height: 150px;
+			max-height: 500px;
+			overflow-y: auto;
+			scroll-behavior: smooth;
+		}
+		body.dark .progression-display { background: #374151; border-color: #fff; }
+		.progression-item {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 15px 20px;
+			margin-bottom: 10px;
+			border-radius: 12px;
+			border: 4px solid #000;
+			font-weight: bold;
+			font-size: 1.1rem;
+			position: relative;
+			transition: all 0.3s;
+			color: #000;
+			gap: 15px;
+		}
+		.progression-item:hover {
+			transform: translateX(5px);
+			box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+		}
+		.progression-item-number {
+			background: rgba(0,0,0,0.15);
+			padding: 8px 15px;
+			border-radius: 10px;
+			font-size: 1.2rem;
+			font-weight: 900;
+			min-width: 50px;
+			text-align: center;
+		}
+		.progression-item-content {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+		}
+		.progression-item .remove-btn {
+			background: #ef4444;
+			color: white;
+			border: 3px solid #000;
+			border-radius: 50%;
+			width: 35px;
+			height: 35px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			font-size: 1rem;
+			font-weight: bold;
+			flex-shrink: 0;
+			transition: all 0.2s;
+		}
+		.progression-item .remove-btn:hover {
+			transform: scale(1.1);
+			box-shadow: 0 3px 10px rgba(239, 68, 68, 0.5);
+		}
+		.progression-item.playing {
+			transform: translateX(15px) scale(1.05);
+			box-shadow: 0 0 40px #fbbf24, 0 8px 25px rgba(0,0,0,0.4);
+			border-width: 6px;
+			border-color: #f59e0b;
+			background: linear-gradient(135deg, var(--item-color) 0%, #fbbf24 100%) !important;
+		}
+		.progression-item.playing .progression-item-number {
+			background: #f59e0b;
+			color: #000;
+			animation: pulse 0.5s ease-in-out;
+		}
+		@keyframes pulse {
+			0%, 100% { transform: scale(1); }
+			50% { transform: scale(1.15); }
+		}
+		
+    </style>
+</head>
+<body class="light">
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Herramientas Musicales 2025.10</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Modo</button>
+        </div>
+
+        <!-- Módulo 01: Transponer Notas -->
+        <div class="module">
+            <h2>
+                🎼 Transponer Notas Musicales
+                <button class="help-btn" onclick="toggleHelp(1)">❓ Ayuda</button>
+            </h2>
+            <div id="help-1" class="help-content">
+                <strong>Descripción:</strong> Transpone notas musicales por semitonos.<br>
+                <strong>Uso:</strong> Pega tu texto con acordes, selecciona cuántos semitonos transponer (+/-), elige el modo (sostenidos #, bemoles b, o solfeo).<br>
+                <strong>Ejemplo:</strong> "Intro: C G Am F" con +2 semitonos → "Intro: D A Bm G"<br>
+                <strong>Notas bemoles:</strong> "Bb_C" con +1 semitono → "B_C#" (elimina bemol)
+            </div>
+            
+            <textarea id="transpose-input" rows="4" placeholder="Ingresa tus acordes aquí..." oninput="transposeNotes()"></textarea>
+            <textarea id="transpose-output" rows="12" readonly style="height: 300px; overflow-y: auto;"></textarea>
+            
+            <div class="controls">
+                <button class="btn btn-blue" onclick="changeSemitones(-1)">-</button>
+                <span class="semitone-counter" id="semitone-count">0</span>
+                <button class="btn btn-blue" onclick="changeSemitones(1)">+</button>
+                
+                <button class="btn" id="mode-sharp" onclick="changeMode('sharp')">#</button>
+                <button class="btn" id="mode-flat" onclick="changeMode('flat')">b</button>
+                <button class="btn" id="mode-solfeo" onclick="changeMode('solfeo')">S</button>
+                
+                <button class="btn btn-purple" onclick="changeFontSize(-1)">A-</button>
+                <button class="btn btn-purple" onclick="changeFontSize(0)">A</button>
+                <button class="btn btn-purple" onclick="changeFontSize(1)">A+</button>
+                
+                <button class="btn btn-green" onclick="copyTransposed()">Copiar</button>
+                <button class="btn btn-red" onclick="resetTranspose()">Reiniciar</button>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <input type="text" id="history-title" placeholder="Título del historial...">
+                <button class="btn btn-green" onclick="saveToHistory()">💾 Guardar Historial</button>
+                <button class="btn btn-red" onclick="deleteSelectedHistory()">🗑️ Eliminar Seleccionados</button>
+            </div>
+
+            <div id="history-list" class="history-box"></div>
+        </div>
+
+        <!-- Módulo 02: Metrónomo -->
+        <div class="module">
+            <h2>
+                ⏱️ Metrónomo
+                <button class="help-btn" onclick="toggleHelp(2)">❓ Ayuda</button>
+            </h2>
+            <div id="help-2" class="help-content">
+                <strong>Descripción:</strong> Metrónomo digital con efectos visuales y sonoros.<br>
+                <strong>Uso:</strong> Ajusta BPM (40-240), selecciona compás (2/4, 3/4, 4/4, 6/8) y subdivisión, luego presiona Iniciar.<br>
+                <strong>Ejemplo:</strong> BPM 120, compás 4/4, subdivisión en corcheas para práctica estándar.
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-green" id="metronome-toggle" onclick="toggleMetronome()">▶️ Iniciar</button>
+                <button class="btn btn-blue" onclick="changeBPM(-5)">-</button>
+                <span class="semitone-counter" id="bpm-display">120</span>
+                <button class="btn btn-blue" onclick="changeBPM(5)">+</button>
+                
+                <select id="time-signature" onchange="updateMetronome()" style="padding: 10px; font-weight: bold;">
+                    <option value="2/4">2/4</option>
+                    <option value="3/4">3/4</option>
+                    <option value="4/4" selected>4/4</option>
+                    <option value="6/8">6/8</option>
+                </select>
+                
+                <select id="subdivision" onchange="updateMetronome()" style="padding: 10px; font-weight: bold;">
+                    <option value="1">Negras</option>
+                    <option value="2">Corcheas</option>
+                    <option value="3">Tresillos</option>
+                    <option value="4">Semicorcheas</option>
+                </select>
+            </div>
+
+            <div id="metronome-beats" style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;"></div>
+
+            <div style="margin-top: 15px;">
+                <input type="text" id="metronome-session-title" placeholder="Título de sesión...">
+                <button class="btn btn-green" onclick="saveMetronomeSession()">💾 Guardar Sesión</button>
+                <button class="btn btn-red" onclick="deleteSelectedMetronomeSessions()">🗑️ Eliminar Seleccionados</button>
+            </div>
+
+            <div id="metronome-sessions" class="history-box"></div>
+        </div>
+
+        <!-- Módulo 03: Acordes y Escalas Armónicas -->
+        <div class="module">
+            <h2>
+                🎹 Acordes y Escalas Armónicas
+                <button class="help-btn" onclick="toggleHelp(3)">❓ Ayuda</button>
+            </h2>
+            <div id="help-3" class="help-content">
+                <strong>Descripción:</strong> Muestra todas las notas y acordes de una escala seleccionada.<br>
+                <strong>Uso:</strong> Selecciona una nota base (C, D, E...) y tipo de escala (Mayor, Menor, Pentatónica...), presiona Mostrar Escalas.<br>
+                <strong>Ejemplo:</strong> C Mayor mostrará: I-C (C, E, G), ii-Dm (D, F, A), iii-Em (E, G, B), etc.
+            </div>
+
+            <select id="scale-root" style="padding: 10px; font-weight: bold; margin-right: 10px;">
+                <option value="C">C</option>
+                <option value="C#">C#</option>
+                <option value="D">D</option>
+                <option value="D#">D#</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="F#">F#</option>
+                <option value="G">G</option>
+                <option value="G#">G#</option>
+                <option value="A">A</option>
+                <option value="A#">A#</option>
+                <option value="B">B</option>
+            </select>
+
+            <select id="scale-type" style="padding: 10px; font-weight: bold; margin-right: 10px;">
+                <option value="major">Mayor</option>
+                <option value="minor">Menor Natural</option>
+                <option value="harmonic-minor">Menor Armónica</option>
+                <option value="melodic-minor">Menor Melódica</option>
+                <option value="pentatonic-major">Pentatónica Mayor</option>
+                <option value="pentatonic-minor">Pentatónica Menor</option>
+                <option value="blues">Blues</option>
+                <option value="chromatic">Cromática</option>
+                <option value="dorian">Dórico (Modal)</option>
+                <option value="phrygian">Frigio (Modal)</option>
+                <option value="lydian">Lidio (Modal)</option>
+                <option value="mixolydian">Mixolidio (Modal)</option>
+            </select>
+
+            <button class="btn btn-green" onclick="showScale()">🎼 Mostrar Escalas</button>
+
+            <div id="scale-result" style="display: none; background: #f0f9ff; border: 3px solid #0ea5e9; border-radius: 10px; padding: 15px; margin-top: 15px;"></div>
+        </div>
+
+        <!-- Módulo 04: Arreglo de Voces -->
+        <div class="module">
+            <h2>
+                🎤 Arreglo de Voces
+                <button class="help-btn" onclick="toggleHelp(4)">❓ Ayuda</button>
+            </h2>
+            <div id="help-4" class="help-content">
+                <strong>Descripción:</strong> Genera armonías para voces adicionales basadas en un acorde.<br>
+                <strong>Uso:</strong> Selecciona la nota base y tipo de acorde, presiona Generar Voces.<br>
+                <strong>Ejemplo:</strong> C Mayor generará:<br>
+                - Melodía Principal: C<br>
+                - Segunda Voz (Tercera): E<br>
+                - Tercera Voz (Quinta): G
+            </div>
+
+            <select id="voice-root" style="padding: 10px; font-weight: bold; margin-right: 10px;">
+                <option value="C">C</option>
+                <option value="C#">C#</option>
+                <option value="D">D</option>
+                <option value="D#">D#</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="F#">F#</option>
+                <option value="G">G</option>
+                <option value="G#">G#</option>
+                <option value="A">A</option>
+                <option value="A#">A#</option>
+                <option value="B">B</option>
+            </select>
+
+            <select id="voice-type" style="padding: 10px; font-weight: bold; margin-right: 10px;">
+                <option value="major">Mayor</option>
+                <option value="minor">Menor</option>
+                <option value="7">Séptima</option>
+                <option value="m7">Menor Séptima</option>
+                <option value="maj7">Séptima Mayor</option>
+                <option value="dim">Disminuido</option>
+                <option value="aug">Aumentado</option>
+                <option value="sus2">Sus2</option>
+                <option value="sus4">Sus4</option>
+            </select>
+
+            <button class="btn btn-green" onclick="generateVoices()">🎵 Generar Voces</button>
+
+            <div id="voice-result" style="display: none; background: #fef3c7; border: 3px solid #f59e0b; border-radius: 10px; padding: 20px; margin-top: 15px;"></div>
+        </div>
+
+        <!-- Módulo 05: Pad de Sonidos de Notas -->
+        <div class="module">
+            <h2>🎹 Pad de Sonidos de Notas <button class="help-btn" onclick="toggleHelp(5)">❓ Ayuda</button></h2>
+            <div id="help-5" class="help-content">
+                <strong>Descripción:</strong> Toca notas musicales y crea secuencias.<br>
+                <strong>Uso:</strong> Selecciona octava (1-6), activa "Grabar Sonidos", toca las notas para grabar secuencia, ajusta BPM y reproduce.<br>
+                <strong>Funciones:</strong> Puedes agregar silencios, activar bucle, editar notas y guardar secuencias.
+            </div>
+            <div class="controls">
+                <span style="font-weight: bold; margin-right: 5px;">Octava:</span>
+                <button class="btn btn-blue" onclick="changeOctave(-1)">-</button>
+                <span class="semitone-counter" id="octave-display">4</span>
+                <button class="btn btn-blue" onclick="changeOctave(1)">+</button>
+                <button class="btn btn-yellow" id="record-toggle" onclick="toggleRecording()">⏺️ Grabar Sonidos</button>
+                <button class="btn btn-orange" onclick="addSilence()">🔇 Silencio</button>
+            </div>
+            <div id="note-pad" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px;"></div>
+            <div class="controls" style="margin-top: 15px;">
+                <span style="font-weight: bold; margin-right: 5px;">BPM:</span>
+                <button class="btn btn-blue" onclick="changePadBPM(-5)">-</button>
+                <span class="semitone-counter" id="pad-bpm">160</span>
+                <button class="btn btn-blue" onclick="changePadBPM(5)">+</button>
+                <button class="btn btn-green" id="play-sequence" onclick="playSequence()">▶️ Reproducir</button>
+                <button class="btn btn-purple" id="loop-toggle" onclick="toggleLoop()">🔁 Bucle</button>
+                <button class="btn btn-orange" id="edit-sequence" onclick="toggleEditMode()">🔄 Reemplazar</button>
+                <button class="btn btn-red" onclick="resetPad()">🔄 Reiniciar</button>
+            </div>
+            <div id="note-sequence" style="background: #f3f4f6; border: 3px solid #000; border-radius: 10px; padding: 15px; margin-top: 15px; min-height: 150px; max-height: 300px; overflow-y: auto;"></div>
+            <div style="margin-top: 15px;">
+                <input type="text" id="pad-title" placeholder="Título de secuencia...">
+                <button class="btn btn-green" onclick="savePadSequence()">💾 Guardar Secuencia</button>
+                <button class="btn btn-red" onclick="deleteSelectedPadSequences()">🗑️ Eliminar</button>
+            </div>
+            <div id="pad-sequences" class="history-box"></div>
+        </div>
+
+        <!-- Módulo 06: Acorde Inverso -->
+        <div class="module">
+            <h2>
+                🔍 Acorde Inverso
+                <button class="help-btn" onclick="toggleHelp(6)">❓ Ayuda</button>
+            </h2>
+            <div id="help-6" class="help-content">
+                <strong>Descripción:</strong> Identifica acordes a partir de una serie de notas.<br>
+                <strong>Uso:</strong> Ingresa entre 3 y 18 notas separadas por comas o espacios (ej: C E G o C, E, G). Presiona Analizar.<br>
+                <strong>Ejemplo:</strong> "C E G" identificará "C Mayor (C, E, G)"<br>
+                <strong>Nota:</strong> Las notas se convertirán automáticamente a MAYÚSCULAS.
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="chord-finder-input" placeholder="Ej: C E G  o  C, E, G, B" style="flex: 1; min-width: 200px; text-transform: uppercase;">
+                <button class="btn btn-green" onclick="findChords()">🔍 Analizar</button>
+                <button class="btn btn-red" onclick="resetChordFinder()">🔄 Reiniciar</button>
+            </div>
+
+            <div id="chord-finder-result" style="display: none; background: #f0fdf4; border: 3px solid #22c55e; border-radius: 10px; padding: 15px; margin-top: 15px;"></div>
+        </div>
+
+        <!-- Módulo 07: Generador de Progresiones de Ejemplo -->
+        <div class="module">
+            <h2>
+                📊 Generador de Progresiones de Ejemplo
+                <button class="help-btn" onclick="toggleHelp(7)">❓ Ayuda</button>
+            </h2>
+            <div id="help-7" class="help-content">
+                <strong>Descripción:</strong> Genera progresiones armónicas clásicas automáticamente.<br>
+                <strong>Uso:</strong> Selecciona tonalidad (C, D, E...) y tipo de escala (Mayor/Menor), presiona Generar.<br>
+                <strong>Ejemplo:</strong> C Mayor genera:<br>
+                - I (C): C, E, G<br>
+                - ii (Dm): D, F, A<br>
+                - iii (Em): E, G, B<br>
+                - IV (F): F, A, C<br>
+                - V (G): G, B, D<br>
+                - vi (Am): A, C, E<br>
+                - vii° (Bdim): B, D, F
+            </div>
+
+            <select id="progression-root" style="padding: 10px; font-weight: bold; margin-right: 10px;">
+                <option value="C">C</option>
+                <option value="C#">C#</option>
+                <option value="D">D</option>
+                <option value="D#">D#</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="F#">F#</option>
+                <option value="G">G</option>
+                <option value="G#">G#</option>
+                <option value="A">A</option>
+                <option value="A#">A#</option>
+                <option value="B">B</option>
+            </select>
+
+            <select id="progression-scale" style="padding: 10px; font-weight: bold; margin-right: 10px;">
+                <option value="major">Mayor</option>
+                <option value="minor">Menor</option>
+            </select>
+
+            <button class="btn btn-green" onclick="generateProgression()">🎼 Generar</button>
+
+            <div id="progression-result" style="display: none; background: #fef3c7; border: 3px solid #f59e0b; border-radius: 10px; padding: 15px; margin-top: 15px;"></div>
+        </div>
+		
+		<!-- Módulo 08: Compositor de Progresiones -->
+        <div class="module">
+            <h2>
+                🎹 Compositor de Progresiones
+                <button class="help-btn" onclick="toggleHelp(8)">❓ Ayuda</button>
+            </h2>
+            <div id="help-8" class="help-content">
+                <strong>Descripción:</strong> Crea y escucha progresiones de acordes personalizadas con control de tempo.<br>
+                <strong>Uso:</strong> Selecciona tonalidad y escala, haz clic en los acordes (I-VII) para agregarlos a tu progresión, ajusta el tempo y presiona Escuchar.<br>
+                <strong>Funciones:</strong><br>
+                - <strong>Acordes (I-VII):</strong> Haz clic para agregar a la progresión<br>
+                - <strong>Silencio:</strong> Añade una pausa en la progresión<br>
+                - <strong>Bucle:</strong> Repite la progresión indefinidamente<br>
+                - <strong>X roja:</strong> Elimina un acorde de la progresión<br>
+                - <strong>Guardar:</strong> Almacena tu progresión con un título<br>
+                - <strong>Cargar:</strong> Recupera progresiones guardadas<br>
+                <strong>Ejemplo:</strong> C Mayor → I-IV-V-I crea la progresión clásica C-F-G-C
+            </div>
+
+            <!-- Controles de Tonalidad y Escala -->
+            <div class="controls" style="margin-bottom: 20px;">
+                <label style="font-weight: bold; margin-right: 5px;">Tonalidad:</label>
+                <select id="prog-root" onchange="updateChordPalette()">
+                    <option value="C">C</option>
+                    <option value="C#">C#</option>
+                    <option value="D">D</option>
+                    <option value="D#">D#</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="F#">F#</option>
+                    <option value="G">G</option>
+                    <option value="G#">G#</option>
+                    <option value="A">A</option>
+                    <option value="A#">A#</option>
+                    <option value="B">B</option>
+                </select>
+
+                <label style="font-weight: bold; margin-right: 5px;">Escala:</label>
+                <select id="prog-scale" onchange="updateChordPalette()">
+                    <option value="major">Mayor</option>
+                    <option value="minor">Menor Natural</option>
+                    <option value="harmonic-minor">Menor Armónica</option>
+                </select>
+            </div>
+
+            <!-- Control de Tempo -->
+            <div class="controls" style="margin-bottom: 20px;">
+                <label style="font-weight: bold; margin-right: 5px;">Tempo (BPM):</label>
+                <button class="btn btn-blue" onclick="changeProgressionBPM(-10)">-</button>
+                <span class="semitone-counter" id="prog-bpm-display">120</span>
+                <button class="btn btn-blue" onclick="changeProgressionBPM(10)">+</button>
+            </div>
+
+            <!-- Paleta de Acordes Disponibles -->
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="color: #667eea; margin: 0;">🎼 Acordes Disponibles (haz clic para escuchar o agregar):</h3>
+                    <button class="btn btn-yellow" id="record-prog-btn" onclick="toggleProgressionRecording()">▶️ Grabar</button>
+                </div>
+                <div id="chord-palette" class="chord-grid"></div>
+            </div>
+
+            <!-- Área de Progresión -->
+            <div style="margin-bottom: 15px;">
+                <h3 style="color: #667eea; margin-bottom: 10px;">📋 Tu Progresión (vertical):</h3>
+                <div id="progression-area" class="progression-display">
+                    <p style="text-align: center; color: #666; padding: 40px;">
+                        Haz clic en los acordes de arriba para construir tu progresión
+                    </p>
+                </div>
+            </div>
+
+            <!-- Controles de Reproducción -->
+            <div class="controls" style="margin-bottom: 20px;">
+                <button class="btn btn-green" id="play-prog-btn" onclick="playProgression()">▶️ Escuchar</button>
+                <button class="btn btn-purple" id="loop-prog-btn" onclick="toggleProgressionLoop()">🔁 Bucle</button>
+                <button class="btn btn-orange" id="edit-prog-btn" onclick="toggleProgressionEditMode()">✏️ Editar Progresión</button>
+                <button class="btn btn-red" onclick="resetProgression()">🔄 Reiniciar</button>
+            </div>
+
+            <!-- Guardar Progresión -->
+            <div style="margin-top: 15px;">
+                <input type="text" id="progression-title" placeholder="Título de la progresión...">
+                <button class="btn btn-green" onclick="saveProgression()">💾 Guardar Progresión</button>
+                <button class="btn btn-red" onclick="deleteSelectedProgressions()">🗑️ Eliminar Seleccionados</button>
+            </div>
+
+            <!-- Lista de Progresiones Guardadas -->
+            <div id="progression-list" class="history-box"></div>
+        </div>
+		
+    </div>
+
+    <script>
+        let currentTheme = 'light';
+        let semitones = 0;
+        let transposeMode = 'sharp';
+        let outputFontSize = 11;
+        let historyData = [];
+        
+        // Variables del Metrónomo
+        let metronomeInterval = null;
+        let metronomeBPM = 120;
+        let metronomeRunning = false;
+        let metronomeCurrentBeat = 0;
+        let metronomeSessions = [];
+        let audioContext = null;
+
+        // Pad de Sonidos ACTUALIZADO
+        let currentOctave = 4;
+        let noteSequence = [];
+        let isRecording = false;
+        let isPadLooping = false;
+        let padBPM = 160;
+        let isPlayingSequence = false;
+        let isEditingSequence = false;
+        let selectedNoteIndex = -1;
+        let tempEditBuffer = [];
+        let padSequences = [];
+		// Variables del Módulo 08: Compositor de Progresiones
+		let progressionBPM = 120;
+		let progressionChords = [];
+		let isProgressionLooping = false;
+		let isProgressionPlaying = false;
+		let progressionPlayInterval = null;
+		let savedProgressions = [];
+		let editingProgressionIndex = -1;
+		let isEditingProgression = false;
+		let selectedChordIndex = -1;
+		let isRecordingProgression = false;
+		// ...
+        let playInterval = null;
+        let editingPadIndex = -1;
+
+        const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C#', 'D#', 'F#', 'G#', 'A#'];
+		const notesCromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const notesFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+        const notesSolfeo = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+        const noteColors = [
+            '#ff6b6b', '#ee5a6f', '#f06595', '#cc5de8',
+            '#845ef7', '#5c7cfa', '#339af0', '#22b8cf',
+            '#20c997', '#51cf66', '#94d82d', '#ffd43b'
+        ];
+		// Colores para acordes del Módulo 08
+		const chordColors = [
+			'#ff6b6b', // I - Rojo claro
+			'#feca57', // ii - Amarillo
+			'#48dbfb', // iii - Cyan
+			'#ff9ff3', // IV - Rosa
+			'#54a0ff', // V - Azul
+			'#00d2d3', // vi - Turquesa
+			'#a29bfe'  // vii - Lavanda
+		];
+
+        // Intervalos de escalas
+        const scaleIntervals = {
+            'major': [0, 2, 4, 5, 7, 9, 11],
+            'minor': [0, 2, 3, 5, 7, 8, 10],
+            'harmonic-minor': [0, 2, 3, 5, 7, 8, 11],
+            'melodic-minor': [0, 2, 3, 5, 7, 9, 11],
+            'pentatonic-major': [0, 2, 4, 7, 9],
+            'pentatonic-minor': [0, 3, 5, 7, 10],
+            'blues': [0, 3, 5, 6, 7, 10],
+            'chromatic': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            'dorian': [0, 2, 3, 5, 7, 9, 10],
+            'phrygian': [0, 1, 3, 5, 7, 8, 10],
+            'lydian': [0, 2, 4, 6, 7, 9, 11],
+            'mixolydian': [0, 2, 4, 5, 7, 9, 10]
+        };
+
+        // Cualidades de acordes por grado
+        const chordQualities = {
+            'major': ['', 'm', 'm', '', '', 'm', 'dim'],
+            'minor': ['m', 'dim', '', 'm', 'm', '', ''],
+            'harmonic-minor': ['m', 'dim', 'aug', 'm', '', '', 'dim'],
+            'melodic-minor': ['m', 'm', 'aug', '', '', 'dim', 'dim'],
+            'dorian': ['m', 'm', '', '', 'm', 'dim', ''],
+            'phrygian': ['m', '', '', 'm', 'dim', '', 'm'],
+            'lydian': ['', '', 'm', 'dim', '', 'm', 'm'],
+            'mixolydian': ['', 'm', 'dim', '', 'm', 'm', '']
+        };
+		// Nombres romanos de grados para Módulo 08
+		const romanNumerals = {
+			'major': ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+			'minor': ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
+			'harmonic-minor': ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°']
+		};
+
+        // Definición de intervalos para cada tipo de acorde
+        const chordIntervals = {
+            'major': [0, 4, 7],
+            'minor': [0, 3, 7],
+            'dim': [0, 3, 6],
+            'aug': [0, 4, 8],
+            '7': [0, 4, 7, 10],
+            'm7': [0, 3, 7, 10],
+            'maj7': [0, 4, 7, 11],
+            'sus2': [0, 2, 7],
+            'sus4': [0, 5, 7],
+            '6': [0, 4, 7, 9],
+            'm6': [0, 3, 7, 9],
+            '9': [0, 4, 7, 10, 14],
+            'add9': [0, 4, 7, 14],
+            'dim7': [0, 3, 6, 9]
+        };
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playClick(frequency, duration = 0.1) {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playNote(frequency, duration = 0.3) {
+			initAudio();
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+			oscillator.frequency.value = frequency;
+			oscillator.type = 'sine';
+			gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+			oscillator.start(audioContext.currentTime);
+			oscillator.stop(audioContext.currentTime + duration);
+		}
+
+        function getNoteFrequency(note, octave) {
+			// Orden cromático correcto para cálculo de frecuencias
+			const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+			const noteIndex = chromaticScale.indexOf(note);   
+			
+			if (noteIndex === -1) return 440; // Fallback   
+			
+			const A4 = 440; // La4 = 440 Hz	
+			// A está en índice 9 de la escala cromática
+			const semitoneOffset = (octave - 4) * 12 + (noteIndex - 9);
+			return A4 * Math.pow(2, semitoneOffset / 12);
+		}
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.className = currentTheme;
+        }
+
+        function toggleHelp(moduleNum) {
+            const help = document.getElementById('help-' + moduleNum);
+            help.style.display = help.style.display === 'none' || !help.style.display ? 'block' : 'none';
+        }
+
+        function changeSemitones(change) {
+            semitones += change;
+            document.getElementById('semitone-count').textContent = semitones > 0 ? '+' + semitones : semitones;
+            transposeNotes();
+        }
+
+        function changeMode(mode) {
+            transposeMode = mode;
+            document.querySelectorAll('[id^="mode-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('mode-' + mode).classList.add('active');
+            transposeNotes();
+        }
+
+        function changeFontSize(change) {
+            if (change === 0) outputFontSize = 11;
+            else outputFontSize = Math.max(8, Math.min(24, outputFontSize + change * 2));
+            
+            const output = document.getElementById('transpose-output');
+            output.style.fontSize = outputFontSize + 'pt';
+            output.style.height = '300px';
+            output.style.overflowY = 'auto';
+        }
+
+        function isMusicalNote(word) {
+            const pattern = /^[A-G](b|#)?(m|7|m7|maj7|dim|sus2|sus4|add9)?$/;
+            return pattern.test(word);
+        }
+
+        function transposeNote(note, semitonesShift, mode) {
+            let match = note.match(/^([A-G](b|#)?)(.*)/);
+            if (!match) return note;
+            
+            let baseNote = match[1];
+            let suffix = match[3];
+            let hasFlat = baseNote.includes('b');
+            
+            if (hasFlat) {
+                const flatMap = {
+                    'Bb': 'A#', 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#'
+                };
+                baseNote = flatMap[baseNote] || baseNote;
+            }
+            
+            let index = notes.indexOf(baseNote);
+            if (index === -1) return note;
+            
+            index = (index + semitonesShift + 12 * 100) % 12;
+            
+            let resultNote;
+            if (hasFlat) {
+                resultNote = notes[index];
+            } else {
+                if (mode === 'flat') {
+                    resultNote = notesFlat[index];
+                } else if (mode === 'solfeo') {
+                    resultNote = notesSolfeo[index];
+                } else {
+                    resultNote = notes[index];
+                }
+            }
+            
+            return resultNote + suffix;
+        }
+
+        function transposeNotes() {
+            const input = document.getElementById('transpose-input').value;
+            if (!input) {
+                document.getElementById('transpose-output').value = '';
+                return;
+            }
+            
+            const lines = input.split('\n');
+            const output = [];
+
+            for (let line of lines) {
+                if (line.includes(':')) {
+                    const colonIndex = line.indexOf(':');
+                    const label = line.substring(0, colonIndex + 1);
+                    const content = line.substring(colonIndex + 1);
+                    output.push(label + transposeLine(content));
+                } else {
+                    output.push(transposeLine(line));
+                }
+            }
+
+            document.getElementById('transpose-output').value = output.join('\n');
+        }
+
+        function transposeLine(line) {
+            let result = '';
+            let currentWord = '';
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (/[\s\-_/()*\/]/.test(char)) {
+                    if (currentWord) {
+                        if (isMusicalNote(currentWord)) {
+                            result += transposeNote(currentWord, semitones, transposeMode);
+                        } else {
+                            result += currentWord;
+                        }
+                        currentWord = '';
+                    }
+                    result += char;
+                } else {
+                    currentWord += char;
+                }
+            }
+            
+            if (currentWord) {
+                if (isMusicalNote(currentWord)) {
+                    result += transposeNote(currentWord, semitones, transposeMode);
+                } else {
+                    result += currentWord;
+                }
+            }
+            
+            return result;
+        }
+
+        function copyTransposed() {
+            const output = document.getElementById('transpose-output');
+            output.select();
+            document.execCommand('copy');
+            alert('¡Copiado al portapapeles!');
+        }
+
+        function resetTranspose() {
+            semitones = 0;
+            document.getElementById('semitone-count').textContent = '0';
+            document.getElementById('transpose-input').value = '';
+            document.getElementById('transpose-output').value = '';
+            outputFontSize = 11;
+            document.getElementById('transpose-output').style.fontSize = '11pt';
+        }
+
+        function saveToHistory() {
+            const title = document.getElementById('history-title').value.trim();
+            const content = document.getElementById('transpose-output').value;
+            
+            if (!title || !content) {
+                alert('Por favor ingresa un título y contenido para guardar');
+                return;
+            }
+
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const preview = content.split('\n')[0].substring(0, 50);
+            
+            historyData.push({ date, title, content, preview });
+            document.getElementById('history-title').value = '';
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            
+            if (historyData.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay registros guardados</p>';
+                return;
+            }
+            
+            let html = '';
+            for (let i = 0; i < historyData.length; i++) {
+                const item = historyData[i];
+                html += `
+                    <div style="border: 4px solid #000; padding: 12px; margin-bottom: 12px; border-radius: 10px; background: #fff; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;">
+                        <input type="checkbox" id="hist-${i}" value="${i}" style="width: 20px; height: 20px;">
+                        
+                        <div style="min-width: 0;">
+                            <div id="title-display-${i}" style="font-weight: bold; font-size: 11pt; margin-bottom: 6px; color: #000;">${item.title}</div>
+                            <input type="text" id="title-edit-${i}" value="${item.title}" style="display: none; width: 100%; padding: 8px; border: 3px solid #333; border-radius: 8px; font-weight: bold; font-size: 11pt; margin-bottom: 6px; background: #fff; color: #000;">
+                            <div style="color: #666; font-size: 0.75rem; margin-bottom: 3px;">📅 ${item.date}</div>
+                            <div style="color: #555; font-size: 0.7rem;">📝 ${item.preview}...</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: nowrap;">
+                            <button id="edit-btn-${i}" onclick="toggleEditMode(${i})" style="padding: 8px 16px; background: #a855f7; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">Editar</button>
+                            <button onclick="loadHistory(${i})" style="padding: 8px 16px; background: #22c55e; color: #000; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">Cargar</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
+        }
+
+        let editingIndex = -1;
+
+        function toggleEditMode(index) {
+            const displayEl = document.getElementById('title-display-' + index);
+            const editEl = document.getElementById('title-edit-' + index);
+            const btnEl = document.getElementById('edit-btn-' + index);
+            
+            if (editingIndex === index) {
+                // Guardar cambios
+                const newTitle = editEl.value.trim();
+                if (!newTitle) {
+                    alert('❌ El título no puede estar vacío');
+                    return;
+                }
+                historyData[index].title = newTitle;
+                historyData[index].date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                editingIndex = -1;
+                renderHistory();
+                alert('✅ Título actualizado correctamente');
+            } else {
+                // Activar modo edición
+                displayEl.style.display = 'none';
+                editEl.style.display = 'block';
+                editEl.focus();
+                btnEl.textContent = 'Guardar';
+                btnEl.style.background = '#3b82f6';
+                editingIndex = index;
+            }
+        }
+
+        function editHistoryTitle(index) {
+            // Esta función ya no se usa, pero la dejamos por compatibilidad
+            toggleEditMode(index);
+        }
+
+        function loadHistory(index) {
+            const item = historyData[index];
+            document.getElementById('transpose-input').value = item.content;
+            transposeNotes();
+        }
+
+        function deleteSelectedHistory() {
+            const checkboxes = document.querySelectorAll('[id^="hist-"]:checked');
+            const indices = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => b - a);
+            indices.forEach(index => historyData.splice(index, 1));
+            renderHistory();
+        }
+
+        // MÓDULO 02: METRÓNOMO
+
+        function changeBPM(change) {
+            metronomeBPM = Math.max(40, Math.min(240, metronomeBPM + change));
+            document.getElementById('bpm-display').textContent = metronomeBPM;
+            if (metronomeRunning) {
+                stopMetronome();
+                startMetronome();
+            }
+        }
+
+        function updateMetronome() {
+            const signature = document.getElementById('time-signature').value;
+            const beats = parseInt(signature.split('/')[0]);
+            renderMetronomeBeats(beats);
+            if (metronomeRunning) {
+                stopMetronome();
+                startMetronome();
+            }
+        }
+
+        function renderMetronomeBeats(count) {
+            const container = document.getElementById('metronome-beats');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const circle = document.createElement('div');
+                circle.style.cssText = `
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    border: 4px solid #333;
+                    background: #e5e7eb;
+                    transition: all 0.1s;
+                `;
+                circle.id = 'beat-' + i;
+                if (i === 0) circle.classList.add('first-beat');
+                container.appendChild(circle);
+            }
+        }
+
+        function toggleMetronome() {
+            metronomeRunning = !metronomeRunning;
+            const btn = document.getElementById('metronome-toggle');
+            
+            if (metronomeRunning) {
+                btn.textContent = '⏸️ Detener';
+                btn.classList.remove('btn-green');
+                btn.classList.add('btn-red');
+                startMetronome();
+            } else {
+                btn.textContent = '▶️ Iniciar';
+                btn.classList.remove('btn-red');
+                btn.classList.add('btn-green');
+                stopMetronome();
+            }
+        }
+
+        function startMetronome() {
+            const signature = document.getElementById('time-signature').value;
+            const beats = parseInt(signature.split('/')[0]);
+            const subdivision = parseInt(document.getElementById('subdivision').value);
+            const interval = 60000 / (metronomeBPM * subdivision);
+            
+            metronomeCurrentBeat = 0;
+            let subBeat = 0;
+            
+            metronomeInterval = setInterval(() => {
+                if (subBeat === 0) {
+                    document.querySelectorAll('[id^="beat-"]').forEach(c => {
+                        c.style.background = '#e5e7eb';
+                        c.style.transform = 'scale(1)';
+                        c.style.boxShadow = 'none';
+                    });
+                    
+                    const currentCircle = document.getElementById('beat-' + metronomeCurrentBeat);
+                    if (metronomeCurrentBeat === 0) {
+                        currentCircle.style.background = '#ef4444';
+                        currentCircle.style.boxShadow = '0 0 30px #ef4444';
+                    } else {
+                        currentCircle.style.background = '#22c55e';
+                        currentCircle.style.boxShadow = '0 0 30px #22c55e';
+                    }
+                    currentCircle.style.transform = 'scale(1.1)';
+                }
+                
+                const frequency = metronomeCurrentBeat === 0 ? 1000 : 800;
+                playClick(frequency, 0.05);
+                
+                subBeat++;
+                if (subBeat >= subdivision) {
+                    subBeat = 0;
+                    metronomeCurrentBeat = (metronomeCurrentBeat + 1) % beats;
+                }
+            }, interval);
+        }
+
+        function stopMetronome() {
+            if (metronomeInterval) {
+                clearInterval(metronomeInterval);
+                metronomeInterval = null;
+            }
+            document.querySelectorAll('[id^="beat-"]').forEach(c => {
+                c.style.background = '#e5e7eb';
+                c.style.transform = 'scale(1)';
+                c.style.boxShadow = 'none';
+            });
+        }
+
+        function saveMetronomeSession() {
+            const title = document.getElementById('metronome-session-title').value.trim();
+            if (!title) {
+                alert('Por favor ingresa un título para la sesión');
+                return;
+            }
+
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const session = {
+                date,
+                title,
+                bpm: metronomeBPM,
+                signature: document.getElementById('time-signature').value,
+                subdivision: document.getElementById('subdivision').value
+            };
+            
+            metronomeSessions.push(session);
+            document.getElementById('metronome-session-title').value = '';
+            renderMetronomeSessions();
+        }
+
+        function renderMetronomeSessions() {
+            const list = document.getElementById('metronome-sessions');
+            
+            if (metronomeSessions.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay sesiones guardadas</p>';
+                return;
+            }
+            
+            let html = '';
+            for (let i = 0; i < metronomeSessions.length; i++) {
+                const item = metronomeSessions[i];
+                html += `
+                    <div style="border: 4px solid #000; padding: 12px; margin-bottom: 12px; border-radius: 10px; background: #fff; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;">
+                        <input type="checkbox" id="metro-${i}" value="${i}" style="width: 20px; height: 20px;">
+                        
+                        <div style="min-width: 0;">
+                            <div id="metro-title-display-${i}" style="font-weight: bold; font-size: 11pt; margin-bottom: 6px; color: #000;">${item.title}</div>
+                            <input type="text" id="metro-title-edit-${i}" value="${item.title}" style="display: none; width: 100%; padding: 8px; border: 3px solid #333; border-radius: 8px; font-weight: bold; font-size: 11pt; margin-bottom: 6px; background: #fff; color: #000;">
+                            <div style="color: #666; font-size: 0.75rem; margin-bottom: 3px;">📅 ${item.date}</div>
+                            <div style="color: #555; font-size: 0.7rem;">🎵 BPM: ${item.bpm} | Compás: ${item.signature}</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: nowrap;">
+                            <button id="metro-edit-btn-${i}" onclick="toggleMetronomeEditMode(${i})" style="padding: 8px 16px; background: #a855f7; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">Editar</button>
+                            <button onclick="loadMetronomeSession(${i})" style="padding: 8px 16px; background: #22c55e; color: #000; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">Cargar</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
+        }
+
+        let editingMetronomeIndex = -1;
+
+        function toggleMetronomeEditMode(index) {
+            const displayEl = document.getElementById('metro-title-display-' + index);
+            const editEl = document.getElementById('metro-title-edit-' + index);
+            const btnEl = document.getElementById('metro-edit-btn-' + index);
+            
+            if (editingMetronomeIndex === index) {
+                const newTitle = editEl.value.trim();
+                if (!newTitle) {
+                    alert('❌ El título no puede estar vacío');
+                    return;
+                }
+                metronomeSessions[index].title = newTitle;
+                metronomeSessions[index].date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                editingMetronomeIndex = -1;
+                renderMetronomeSessions();
+                alert('✅ Título actualizado correctamente');
+            } else {
+                displayEl.style.display = 'none';
+                editEl.style.display = 'block';
+                editEl.focus();
+                btnEl.textContent = 'Guardar';
+                btnEl.style.background = '#3b82f6';
+                editingMetronomeIndex = index;
+            }
+        }
+
+        function loadMetronomeSession(index) {
+            const session = metronomeSessions[index];
+            metronomeBPM = session.bpm;
+            document.getElementById('bpm-display').textContent = metronomeBPM;
+            document.getElementById('time-signature').value = session.signature;
+            document.getElementById('subdivision').value = session.subdivision;
+            updateMetronome();
+        }
+
+        function deleteSelectedMetronomeSessions() {
+            const checkboxes = document.querySelectorAll('[id^="metro-"]:checked');
+            const indices = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => b - a);
+            indices.forEach(index => metronomeSessions.splice(index, 1));
+            renderMetronomeSessions();
+        }
+
+        // MÓDULO 03: ACORDES Y ESCALAS ARMÓNICAS
+
+        function getChordNotes(root, quality) {
+            const rootIndex = notes.indexOf(root);
+            const intervals = chordIntervals[quality] || [0, 4, 7];
+            return intervals.map(interval => notes[(rootIndex + interval) % 12]);
+        }
+
+        function showScale() {
+            const root = document.getElementById('scale-root').value;
+            const scaleType = document.getElementById('scale-type').value;
+            const intervals = scaleIntervals[scaleType];
+            
+            if (!intervals) {
+                alert('Escala no encontrada');
+                return;
+            }
+            
+            const rootIndex = notes.indexOf(root);
+            const scaleNotes = intervals.map(interval => notes[(rootIndex + interval) % 12]);
+            
+            const scaleTypeName = document.getElementById('scale-type').selectedOptions[0].text;
+            
+            let result = `<h3 style="color: #0284c7; margin-bottom: 15px;">📊 Escala: ${root} ${scaleTypeName}</h3>`;
+            result += `<p style="font-size: 1.1rem; margin-bottom: 20px;"><strong>🎵 Notas de la escala:</strong> ${scaleNotes.join(' - ')}</p>`;
+            
+            // Mostrar acordes solo si la escala tiene cualidades definidas
+            if (chordQualities[scaleType]) {
+                const qualities = chordQualities[scaleType];
+                const degrees = scaleType.includes('minor') || scaleType === 'dorian' || scaleType === 'phrygian' 
+                    ? ['i', 'ii', 'III', 'iv', 'v', 'VI', 'VII']
+                    : ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii'];
+                
+                result += '<hr style="margin: 20px 0; border: 1px solid #0ea5e9;">';
+                result += '<h4 style="color: #0284c7; margin-bottom: 15px;">🎸 Acordes de la escala:</h4>';
+                result += '<div style="text-align: left;">';
+                
+                scaleNotes.forEach((note, index) => {
+                    if (index < qualities.length) {
+                        const quality = qualities[index];
+                        const degree = degrees[index] || (index + 1);
+                        const chordNotes = getChordNotes(note, quality);
+                        
+                        result += `
+                            <div style="background: #e0f2fe; padding: 12px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #0284c7;">
+                                <strong style="font-size: 1.1rem; color: #0c4a6e;">${degree} - ${note}${quality}:</strong>
+                                <span style="color: #0369a1; margin-left: 10px;">${chordNotes.join(', ')}</span>
+                            </div>
+                        `;
+                    }
+                });
+                
+                result += '</div>';
+            } else {
+                result += '<p style="margin-top: 20px; color: #666;"><em>Esta escala no tiene acordes predefinidos (Pentatónica, Blues, Cromática)</em></p>';
+            }
+            
+            document.getElementById('scale-result').innerHTML = result;
+            document.getElementById('scale-result').style.display = 'block';
+        }
+
+        // MÓDULO 04: ARREGLO DE VOCES
+
+        function generateVoices() {
+            const root = document.getElementById('voice-root').value;
+            const type = document.getElementById('voice-type').value;
+            const typeName = document.getElementById('voice-type').selectedOptions[0].text;
+            
+            const chordNotes = getChordNotes(root, type);
+            
+            let result = `<h3 style="color: #d97706; margin-bottom: 20px; text-align: center;">🎤 Arreglo de Voces - ${root}${type === 'major' ? '' : type}</h3>`;
+            
+            result += '<div style="text-align: center; margin: 30px 0;">';
+            
+            // Melodía Principal
+            result += `
+                <div style="background: #fef3c7; padding: 20px; margin-bottom: 15px; border-radius: 10px; border: 3px solid #f59e0b;">
+                    <div style="font-size: 0.9rem; color: #92400e; margin-bottom: 5px;">🎵 Melodía Principal (Fundamental)</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #d97706;">${chordNotes[0]}</div>
+                </div>
+            `;
+            
+            // Segunda Voz (Tercera)
+            if (chordNotes[1]) {
+                result += `
+                    <div style="background: #fed7aa; padding: 20px; margin-bottom: 15px; border-radius: 10px; border: 3px solid #f59e0b;">
+                        <div style="font-size: 0.9rem; color: #92400e; margin-bottom: 5px;">🎶 Segunda Voz (Tercera)</div>
+                        <div style="font-size: 2rem; font-weight: bold; color: #c2410c;">${chordNotes[1]}</div>
+                    </div>
+                `;
+            }
+            
+            // Tercera Voz (Quinta)
+            if (chordNotes[2]) {
+                result += `
+                    <div style="background: #fed7aa; padding: 20px; margin-bottom: 15px; border-radius: 10px; border: 3px solid #f59e0b;">
+                        <div style="font-size: 0.9rem; color: #92400e; margin-bottom: 5px;">🎵 Tercera Voz (Quinta)</div>
+                        <div style="font-size: 2rem; font-weight: bold; color: #c2410c;">${chordNotes[2]}</div>
+                    </div>
+                `;
+            }
+            
+            // Cuarta Voz (Séptima) - si existe
+            if (chordNotes[3]) {
+                result += `
+                    <div style="background: #fed7aa; padding: 20px; margin-bottom: 15px; border-radius: 10px; border: 3px solid #f59e0b;">
+                        <div style="font-size: 0.9rem; color: #92400e; margin-bottom: 5px;">🎶 Cuarta Voz (Séptima)</div>
+                        <div style="font-size: 2rem; font-weight: bold; color: #c2410c;">${chordNotes[3]}</div>
+                    </div>
+                `;
+            }
+            
+            result += '</div>';
+            
+            // Resumen del acorde
+            result += '<hr style="margin: 20px 0; border: 1px solid #f59e0b;">';
+            result += `
+                <div style="text-align: center; padding: 15px; background: #fffbeb; border-radius: 8px;">
+                    <strong style="color: #92400e; font-size: 1.1rem;">🎼 Notas del acorde ${root}${type === 'major' ? '' : type}:</strong><br>
+                    <span style="color: #d97706; font-size: 1.2rem; font-weight: bold;">${chordNotes.join(' - ')}</span>
+                </div>
+            `;
+            
+            // Consejos
+            result += `
+                <div style="margin-top: 20px; padding: 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 5px;">
+                    <strong style="color: #92400e;">💡 Consejos para el arreglo vocal:</strong>
+                    <ul style="margin-top: 10px; color: #78350f; text-align: left; padding-left: 25px;">
+                        <li>La melodía principal lleva la nota fundamental del acorde</li>
+                        <li>La segunda voz armoniza en tercera (3 semitonos arriba en menor, 4 en mayor)</li>
+                        <li>La tercera voz completa el acorde con la quinta</li>
+                        ${chordNotes[3] ? '<li>La cuarta voz añade color con la séptima</li>' : ''}
+                        <li>Mantén el balance de volumen entre todas las voces</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('voice-result').innerHTML = result;
+            document.getElementById('voice-result').style.display = 'block';
+        }
+
+        // MÓDULO 05: PAD DE SONIDOS DE NOTAS
+
+        function initNotePad() {
+            const pad = document.getElementById('note-pad');
+            pad.innerHTML = '';
+            notes.forEach((note, index) => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `padding: 20px; font-size: 1.2rem; font-weight: bold; border: 3px solid #000; border-radius: 10px; cursor: pointer; transition: all 0.2s; background: ${noteColors[index]}; color: #000;`;
+                btn.textContent = note;
+                btn.onclick = () => playPadNote(note, index);
+                pad.appendChild(btn);
+            });
+        }
+
+        function changeOctave(change) {
+            currentOctave = Math.max(1, Math.min(6, currentOctave + change));
+            document.getElementById('octave-display').textContent = currentOctave;
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const btn = document.getElementById('record-toggle');
+            if (isRecording) {
+                btn.classList.add('active');
+                btn.textContent = '⏺️ Grabando...';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '⏺️ Grabar Sonidos';
+            }
+        }
+
+        function playPadNote(note, colorIndex) {
+            const freq = getNoteFrequency(note, currentOctave);
+            playNote(freq, 0.5);
+            if (isRecording) {
+                noteSequence.push({ note, octave: currentOctave, colorIndex });
+                renderNoteSequence();
+            } else if (isEditingSequence && selectedNoteIndex >= 0) {
+                tempEditBuffer.push({ note, octave: currentOctave, colorIndex });
+                renderNoteSequence();
+            }
+            const buttons = document.querySelectorAll('#note-pad button');
+            if (buttons[colorIndex]) {
+                buttons[colorIndex].style.transform = 'scale(1.1)';
+                buttons[colorIndex].style.boxShadow = '0 0 20px ' + noteColors[colorIndex];
+                setTimeout(() => {
+                    buttons[colorIndex].style.transform = '';
+                    buttons[colorIndex].style.boxShadow = '';
+                }, 200);
+            }
+        }
+
+        function addSilence() {
+            if (isRecording) {
+                noteSequence.push({ note: 'SILENCIO', octave: 0, colorIndex: -1 });
+                renderNoteSequence();
+            } else {
+                alert('⚠️ Activa "Grabar Sonidos" primero');
+            }
+        }
+
+        function renderNoteSequence() {
+            const container = document.getElementById('note-sequence');
+            if (noteSequence.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay notas grabadas</p>';
+                return;
+            }
+            let html = '<strong style="display: block; margin-bottom: 15px; font-size: 1.1rem;">🎵 Secuencia grabada (vertical):</strong>';
+            if (isEditingSequence) {
+				html += '<p style="color: #f97316; font-weight: bold; margin-bottom: 10px;">🔄 MODO REEMPLAZO - Selecciona una nota para cambiarla</p>';
+			}
+            for (let index = 0; index < noteSequence.length; index++) {
+                const item = noteSequence[index];
+                const isSelected = selectedNoteIndex === index;
+                let bgColor = item.colorIndex >= 0 ? noteColors[item.colorIndex] : '#666';
+                let borderColor = isSelected ? '#f97316' : '#333';
+                let boxShadow = isSelected ? '0 0 15px #f97316' : 'none';
+                html += `<div id="seq-note-${index}" style="background: ${bgColor}; color: #000; padding: 15px; margin-bottom: 8px; border-radius: 10px; border: 3px solid ${borderColor}; box-shadow: ${boxShadow}; ${isEditingSequence ? 'cursor: pointer;' : ''} font-weight: bold; font-size: 1.2rem; transition: all 0.3s; display: flex; align-items: center; justify-content: space-between;" ${isEditingSequence ? `onclick="selectNoteForEdit(${index})"` : ''}>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; min-width: 50px; text-align: center; font-size: 1rem;">#${index + 1}</span>
+                        <span style="font-size: 1.5rem; font-weight: 900;">${item.note}${item.octave > 0 ? item.octave : ''}</span>
+                    </div>`;
+                if (!isEditingSequence) {
+                    html += `<button onclick="event.stopPropagation(); removeNoteFromSequence(${index})" style="background: #ef4444; color: white; padding: 8px 15px; border-radius: 8px; font-size: 0.9rem; border: 4px solid #000; cursor: pointer; font-weight: bold;">❌ Quitar</button>`;
+                }
+                html += '</div>';
+                if (isSelected && tempEditBuffer.length > 0) {
+                    html += '<div style="margin-left: 30px; margin-bottom: 10px; padding: 12px; background: #dcfce7; border: 3px solid #10b981; border-radius: 8px;"><strong style="color: #166534;">→ Nuevas notas:</strong> ';
+                    for (let j = 0; j < tempEditBuffer.length; j++) {
+                        const newItem = tempEditBuffer[j];
+                        html += `<span style="display: inline-block; margin: 3px; padding: 8px 12px; background: ${newItem.colorIndex >= 0 ? noteColors[newItem.colorIndex] : '#666'}; color: #000; border-radius: 8px; font-weight: bold; border: 2px solid #10b981;">${newItem.note}${newItem.octave}</span>`;
+                    }
+                    html += '</div>';
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function removeNoteFromSequence(index) {
+            noteSequence.splice(index, 1);
+            renderNoteSequence();
+        }
+
+        function selectNoteForEdit(index) {
+            selectedNoteIndex = index;
+            tempEditBuffer = [];
+            renderNoteSequence();
+        }
+
+        function toggleEditMode() {
+            if (isEditingSequence) {
+                if (selectedNoteIndex >= 0 && tempEditBuffer.length > 0) {
+                    const before = noteSequence.slice(0, selectedNoteIndex);
+                    const after = noteSequence.slice(selectedNoteIndex + 1);
+                    noteSequence = [...before, ...tempEditBuffer, ...after];
+                    tempEditBuffer = [];
+                    selectedNoteIndex = -1;
+                }
+                isEditingSequence = false;
+				document.getElementById('edit-sequence').classList.remove('active');
+				document.getElementById('edit-sequence').textContent = '🔄 Reemplazar';
+            } else {
+                isEditingSequence = true;
+				selectedNoteIndex = -1;
+				tempEditBuffer = [];
+				document.getElementById('edit-sequence').classList.add('active');
+				document.getElementById('edit-sequence').textContent = '💾 Guardar Cambio';
+            }
+            renderNoteSequence();
+        }
+
+        function changePadBPM(change) {
+            padBPM = Math.max(40, Math.min(240, padBPM + change));
+            document.getElementById('pad-bpm').textContent = padBPM;
+        }
+
+        function toggleLoop() {
+			isPadLooping = !isPadLooping;
+			document.getElementById('loop-toggle').classList.toggle('active');
+		}
+
+        function playSequence() {
+            if (isPlayingSequence) {
+                isPlayingSequence = false;
+                if (playInterval) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                }
+                const btn = document.getElementById('play-sequence');
+                btn.textContent = '▶️ Reproducir';
+                btn.classList.add('btn-green');
+                btn.classList.remove('btn-red');
+                document.querySelectorAll('[id^="seq-note-"]').forEach(el => {
+                    const index = parseInt(el.id.replace('seq-note-', ''));
+                    const item = noteSequence[index];
+                    if (item) {
+                        el.style.background = item.colorIndex >= 0 ? noteColors[item.colorIndex] : '#666';
+                        el.style.transform = '';
+                        el.style.boxShadow = 'none';
+                        el.style.border = '3px solid #333';
+                        el.style.fontSize = '1.2rem';
+                    }
+                });
+                return;
+            }
+            if (noteSequence.length === 0) {
+                alert('No hay notas en la secuencia');
+                return;
+            }
+            isPlayingSequence = true;
+            const btn = document.getElementById('play-sequence');
+            btn.textContent = '⏸️ Detener';
+            btn.classList.add('btn-red');
+            btn.classList.remove('btn-green');
+            let currentIndex = 0;
+            const playNext = () => {
+                if (!isPlayingSequence) return;
+                if (currentIndex >= noteSequence.length) {
+					if (isPadLooping) {
+						currentIndex = 0;
+                    } else {
+                        isPlayingSequence = false;
+                        if (playInterval) clearInterval(playInterval);
+                        btn.textContent = '▶️ Reproducir';
+                        btn.classList.add('btn-green');
+                        btn.classList.remove('btn-red');
+                        return;
+                    }
+                }
+                document.querySelectorAll('[id^="seq-note-"]').forEach(el => {
+                    const index = parseInt(el.id.replace('seq-note-', ''));
+                    const item = noteSequence[index];
+                    if (item) {
+                        el.style.background = item.colorIndex >= 0 ? noteColors[item.colorIndex] : '#666';
+                        el.style.transform = '';
+                        el.style.boxShadow = 'none';
+                        el.style.border = '3px solid #333';
+                        el.style.fontSize = '1.2rem';
+                    }
+                });
+                const item = noteSequence[currentIndex];
+                const noteEl = document.getElementById('seq-note-' + currentIndex);
+                if (noteEl) {
+                    noteEl.style.background = 'linear-gradient(90deg, #fbbf24, #f59e0b)';
+                    noteEl.style.transform = 'scale(1.08) translateX(10px)';
+                    noteEl.style.boxShadow = '0 0 25px #fbbf24, 0 5px 15px rgba(0,0,0,0.3)';
+                    noteEl.style.border = '5px solid #dc2626';
+                    noteEl.style.fontSize = '1.4rem';
+                    noteEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                if (item.note !== 'SILENCIO') {
+                    const freq = getNoteFrequency(item.note, item.octave);
+                    playNote(freq, 0.4);
+                }
+                currentIndex++;
+            };
+            playNext();
+            playInterval = setInterval(playNext, 60000 / padBPM);
+        }
+
+        function resetPad() {
+			noteSequence = [];
+			isRecording = false;
+			isPadLooping = false;
+            isPlayingSequence = false;
+            isEditingSequence = false;
+            selectedNoteIndex = -1;
+            tempEditBuffer = [];
+            currentOctave = 4;
+            padBPM = 160;
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+            }
+            document.getElementById('octave-display').textContent = currentOctave;
+            document.getElementById('pad-bpm').textContent = padBPM;
+            document.getElementById('record-toggle').classList.remove('active');
+            document.getElementById('record-toggle').textContent = '⏺️ Grabar Sonidos';
+            document.getElementById('loop-toggle').classList.remove('active');
+            document.getElementById('edit-sequence').classList.remove('active');
+			document.getElementById('edit-sequence').textContent = '🔄 Reemplazar';
+            document.getElementById('play-sequence').textContent = '▶️ Reproducir';
+            document.getElementById('play-sequence').classList.add('btn-green');
+            document.getElementById('play-sequence').classList.remove('btn-red');
+            renderNoteSequence();
+        }
+
+        function savePadSequence() {
+            const title = document.getElementById('pad-title').value.trim();
+            if (!title || noteSequence.length === 0) {
+                alert('Por favor ingresa un título y crea una secuencia');
+                return;
+            }
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            padSequences.push({ id: Date.now(), date, title, sequence: [...noteSequence], bpm: padBPM });
+            document.getElementById('pad-title').value = '';
+            renderPadSequences();
+        }
+
+        function renderPadSequences() {
+            const list = document.getElementById('pad-sequences');
+            if (padSequences.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay secuencias guardadas</p>';
+                return;
+            }
+            let html = '';
+            for (let i = 0; i < padSequences.length; i++) {
+                const item = padSequences[i];
+                const isEditing = editingPadIndex === i;
+                html += `<div style="border: 4px solid #000; padding: 12px; margin-bottom: 12px; border-radius: 10px; background: #fff; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;">
+                    <input type="checkbox" id="pad-${i}" value="${i}" style="width: 20px; height: 20px;">
+                    <div>`;
+                if (isEditing) {
+                    html += `<input type="text" id="pad-edit-title-${i}" value="${item.title}" style="width: 100%; padding: 8px; border: 4px solid #a855f7; border-radius: 8px; font-weight: bold; font-size: 11pt; margin-bottom: 6px; background: #fff; color: #000;">`;
+                } else {
+                    html += `<div style="font-weight: bold; font-size: 11pt; margin-bottom: 6px;">${item.title}</div>`;
+                }
+                html += `<div style="color: #666; font-size: 0.75rem;">📅 ${item.date} | 🎵 Notas: ${item.sequence.length} | BPM: ${item.bpm}</div></div>
+                    <div style="display: flex; gap: 8px;">`;
+                if (isEditing) {
+                    html += `<button onclick="savePadTitleEdit(${i})" style="padding: 8px 16px; background: #3b82f6; color: #fff; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">💾 Guardar</button>
+                    <button onclick="cancelPadTitleEdit()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">❌</button>`;
+                } else {
+                    html += `<button onclick="startPadTitleEdit(${i})" style="padding: 8px 16px; background: #a855f7; color: #fff; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">✏️ Editar</button>
+                    <button onclick="loadPadSequence(${i})" style="padding: 8px 16px; background: #22c55e; color: #000; border: 4px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cargar</button>`;
+                }
+                html += `</div></div>`;
+            }
+            list.innerHTML = html;
+        }
+
+        function startPadTitleEdit(index) {
+            editingPadIndex = index;
+            renderPadSequences();
+            setTimeout(() => {
+                const input = document.getElementById('pad-edit-title-' + index);
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function savePadTitleEdit(index) {
+            const input = document.getElementById('pad-edit-title-' + index);
+            const newTitle = input.value.trim();
+            if (!newTitle) {
+                alert('❌ El título no puede estar vacío');
+                return;
+            }
+            padSequences[index].title = newTitle;
+            padSequences[index].date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            editingPadIndex = -1;
+            renderPadSequences();
+        }
+
+        function cancelPadTitleEdit() {
+            editingPadIndex = -1;
+            renderPadSequences();
+        }
+
+        function loadPadSequence(index) {
+            const item = padSequences[index];
+            noteSequence = [...item.sequence];
+            padBPM = item.bpm;
+            document.getElementById('pad-bpm').textContent = padBPM;
+            renderNoteSequence();
+        }
+
+        function deleteSelectedPadSequences() {
+            const checkboxes = document.querySelectorAll('[id^="pad-"]:checked');
+            const indices = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => b - a);
+            indices.forEach(index => padSequences.splice(index, 1));
+            renderPadSequences();
+        }
+
+        // MÓDULO 06: ACORDE INVERSO
+
+        function normalizeNote(note) { 
+		note = note.toUpperCase().trim(); 
+		// Mapa completo de bemoles a sostenidos 
+		const flatToSharp = { 'DB': 'C#', 'D♭': 'C#', 'EB': 'D#', 'E♭': 'D#', 'GB': 'F#', 'G♭': 'F#', 'AB': 'G#', 'A♭': 'G#', 'BB': 'A#', 'B♭': 'A#', 'CB': 'B', 'C♭': 'B', 'FB': 'E', 'F♭': 'E', 'E#': 'F', 'B#': 'C' }; 
+		// Verificar si es un bemol 
+		if (flatToSharp[note]) { return flatToSharp[note]; } 
+		// Si es una nota válida cromática, devolverla 
+		if (notesCromatic.includes(note)) { return note; } 
+		// Último intento: remover espacios 
+		note = note.replace(/\s+/g, ''); return flatToSharp[note] || note; }
+
+		function findChords() {
+			const input = document.getElementById('chord-finder-input').value.trim();
+			
+			if (!input) {
+				alert('Por favor ingresa las notas');
+				return;
+			}
+
+			// Separar por comas, espacios, guiones, etc.
+			let inputNotes = input.split(/[,\s\-_|]+/).filter(n => n && n.length > 0);
+			console.log('🎵 Notas ingresadas:', inputNotes);
+			
+			// Validar cantidad
+			if (inputNotes.length < 3) {
+				alert('⚠️ Por favor ingresa al menos 3 notas');
+				return;
+			}
+			
+			if (inputNotes.length > 18) {
+				alert('⚠️ Por favor ingresa máximo 18 notas');
+				return;
+			}
+
+			// Normalizar notas
+			inputNotes = inputNotes.map(note => normalizeNote(note));
+			console.log('🔄 Notas normalizadas:', inputNotes);
+			
+			// Validar que sean notas válidas usando notesCromatic
+			const validNotes = inputNotes.filter(note => notesCromatic.includes(note));
+			console.log('✅ Notas válidas:', validNotes);
+			
+			if (validNotes.length === 0) {
+				alert('⚠️ No se encontraron notas válidas.\n\nUsa: C, C#, D, D#, E, F, F#, G, G#, A, A#, B\no bemoles: Db, Eb, Gb, Ab, Bb');
+				return;
+			}
+
+			// Eliminar duplicados manteniendo el orden
+			const uniqueNotes = [...new Set(validNotes)];
+			console.log('🎯 Notas únicas:', uniqueNotes);
+
+			// Definir todos los tipos de acordes a buscar
+			const chordTypes = [
+				{ name: '', display: 'Mayor', intervals: [0, 4, 7] },
+				{ name: 'm', display: 'Menor', intervals: [0, 3, 7] },
+				{ name: '7', display: 'Séptima Dominante', intervals: [0, 4, 7, 10] },
+				{ name: 'm7', display: 'Menor Séptima', intervals: [0, 3, 7, 10] },
+				{ name: 'maj7', display: 'Séptima Mayor', intervals: [0, 4, 7, 11] },
+				{ name: 'dim', display: 'Disminuido', intervals: [0, 3, 6] },
+				{ name: 'dim7', display: 'Disminuido Séptima', intervals: [0, 3, 6, 9] },
+				{ name: 'aug', display: 'Aumentado', intervals: [0, 4, 8] },
+				{ name: 'sus2', display: 'Suspendido 2', intervals: [0, 2, 7] },
+				{ name: 'sus4', display: 'Suspendido 4', intervals: [0, 5, 7] },
+				{ name: '6', display: 'Sexta', intervals: [0, 4, 7, 9] },
+				{ name: 'm6', display: 'Menor Sexta', intervals: [0, 3, 7, 9] },
+				{ name: 'add9', display: 'Add9', intervals: [0, 4, 7, 14] },
+				{ name: '9', display: 'Novena', intervals: [0, 4, 7, 10, 14] },
+				{ name: 'm9', display: 'Menor Novena', intervals: [0, 3, 7, 10, 14] },
+				{ name: '7sus4', display: 'Séptima Suspendido 4', intervals: [0, 5, 7, 10] }
+			];
+
+			// Buscar acordes posibles
+			const possibleChords = [];
+
+			for (let root of notesCromatic) {
+				const rootIndex = notesCromatic.indexOf(root);
+
+				for (let type of chordTypes) {
+					// Calcular las notas del acorde (mod 12 para octavas)
+					const chordNotes = type.intervals.map(i => {
+						const noteIndex = (rootIndex + (i % 12)) % 12;
+						return notesCromatic[noteIndex];
+					});
+					
+					// Eliminar duplicados del acorde
+					const uniqueChordNotes = [...new Set(chordNotes)];
+					
+					// Verificar si TODAS las notas del acorde están en las notas ingresadas
+					const allNotesMatch = uniqueChordNotes.every(note => uniqueNotes.includes(note));
+					
+					if (allNotesMatch) {
+						// Score basado en cuántas notas usa
+						const score = uniqueChordNotes.length;
+						
+						possibleChords.push({
+							name: root + type.name,
+							display: root + ' ' + type.display,
+							notes: uniqueChordNotes,
+							score: score
+						});
+					}
+				}
+			}
+
+			// Ordenar por score (más notas primero)
+			possibleChords.sort((a, b) => b.score - a.score);
+			console.log('🎸 Acordes encontrados:', possibleChords.length);
+
+			// ========================================
+			// GENERAR HTML DE RESULTADOS
+			// ========================================
+			
+			let result = '<h3 style="color: #15803d; margin-bottom: 15px;">🔍 Análisis de Acordes</h3>';
+			
+			result += '<p style="font-size: 1.1rem; margin-bottom: 20px;">';
+			result += '<strong>🎵 Notas ingresadas:</strong> ';
+			result += '<span style="color: #15803d; font-weight: bold;">' + uniqueNotes.join(', ') + '</span> ';
+			result += '<span style="color: #666; font-size: 0.9rem;">(' + uniqueNotes.length + ' notas)</span>';
+			result += '</p>';
+			
+			// Mostrar notas ignoradas si las hay
+			const invalidNotes = inputNotes.filter(n => !notesCromatic.includes(n) && n.length > 0);
+		
+			if (invalidNotes.length > 0) {
+				result += '<p style="color: #dc2626; margin-bottom: 15px; background: #fee2e2; padding: 10px; border-radius: 5px;">';
+				result += '⚠️ <strong>Notas no reconocidas (ignoradas):</strong> ' + invalidNotes.join(', ');
+				result += '</p>';
+			}
+			
+				result += '<hr style="margin: 20px 0; border: 1px solid #22c55e;">';
+		
+			// Si se encontraron acordes
+			if (possibleChords.length > 0) {
+				result += '<h4 style="color: #15803d; margin-bottom: 15px;">';
+				result += '✅ Acordes posibles encontrados: ';
+				result += '<span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.9rem;">';
+				result += possibleChords.length;
+				result += '</span>';
+				result += '</h4>';
+				
+				result += '<div style="max-height: 500px; overflow-y: auto; padding-right: 10px;">';
+			
+				possibleChords.forEach((chord, index) => {
+					// Color alternado
+					const bgColor = index % 2 === 0 ? '#dcfce7' : '#f0fdf4';
+					
+					result += '<div style="';
+					result += 'background: ' + bgColor + '; ';
+					result += 'padding: 15px; ';
+					result += 'margin-bottom: 10px; ';
+					result += 'border-radius: 10px; ';
+					result += 'border-left: 5px solid #22c55e; ';
+					result += 'box-shadow: 0 2px 5px rgba(0,0,0,0.1); ';
+					result += 'transition: transform 0.2s;';
+					result += '" ';
+					result += 'onmouseover="this.style.transform=\'translateX(5px)\'" ';
+					result += 'onmouseout="this.style.transform=\'translateX(0)\'">';
+				
+					// Header del acorde
+					result += '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">';
+					result += '<div style="flex: 1;">';
+					result += '<strong style="font-size: 1.3rem; color: #166534;">' + chord.display + '</strong>';
+					result += '<span style="background: #22c55e; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; margin-left: 10px; font-weight: bold;">';
+					result += chord.score + ' ' + (chord.score === 1 ? 'nota' : 'notas');
+					result += '</span>';
+					result += '</div>';
+					result += '</div>';
+				
+					// Notas del acorde
+					result += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bbf7d0;">';
+					result += '<span style="color: #15803d; font-weight: bold; font-size: 0.9rem;">📝 Notas:</span>';
+					result += '<span style="color: #166534; margin-left: 8px; font-size: 1.1rem; font-weight: bold;">';
+					result += chord.notes.join(' - ');
+					result += '</span>';
+					result += '</div>';
+				
+					result += '</div>';
+				});
+			
+					result += '</div>';
+			
+					// Consejos
+					result += '<div style="margin-top: 20px; padding: 15px; background: #fffbeb; border-left: 4px solid #fbbf24; border-radius: 5px;">';
+					result += '<strong style="color: #92400e;">💡 Consejos:</strong>';
+					result += '<ul style="margin: 10px 0 0 0; padding-left: 20px; color: #78350f;">';
+					result += '<li>Los acordes se ordenan por cantidad de notas (más completos primero)</li>';
+					result += '<li>Si ingresaste 4+ notas, busca acordes de séptima o extendidos</li>';
+					result += '<li>Verifica el contexto musical para elegir el acorde correcto</li>';
+					result += '</ul>';
+					result += '</div>';
+			
+				} else {
+					// No se encontraron acordes
+					result += '<div style="padding: 30px; text-align: center;">';
+					result += '<p style="color: #dc2626; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;">';
+					result += '❌ No se encontraron acordes';
+					result += '</p>';
+			
+					result += '<div style="background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: left; margin-top: 20px;">';
+					result += '<p style="color: #374151; margin-bottom: 15px; font-weight: bold;">💡 Sugerencias:</p>';
+					result += '<ul style="color: #6b7280; padding-left: 25px; line-height: 1.8;">';
+					result += '<li>Verifica que las notas formen un acorde real</li>';
+					result += '<li><strong>Prueba con estos ejemplos:</strong>';
+					result += '<ul style="margin-top: 8px;">';
+					result += '<li><code style="background: #e5e7eb; padding: 2px 8px; border-radius: 3px; color: #000;">C E G</code> → C Mayor</li>';
+					result += '<li><code style="background: #e5e7eb; padding: 2px 8px; border-radius: 3px; color: #000;">D F A</code> → D Menor</li>';
+					result += '<li><code style="background: #e5e7eb; padding: 2px 8px; border-radius: 3px; color: #000;">G B D F</code> → G Séptima</li>';
+					result += '</ul>';
+					result += '</li>';
+					result += '<li>Usa al menos 3 notas diferentes</li>';
+					result += '<li>Acepta formato: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">C E G</code> ';
+					result += 'o <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">C, E, G</code></li>';
+					result += '</ul>';
+					result += '</div>';
+					result += '</div>';
+				}
+
+				// Mostrar el resultado en el DOM
+				document.getElementById('chord-finder-result').innerHTML = result;
+				document.getElementById('chord-finder-result').style.display = 'block';
+		}
+		
+		
+        function resetChordFinder() {
+            document.getElementById('chord-finder-input').value = '';
+            document.getElementById('chord-finder-result').style.display = 'none';
+        }
+		
+        // MÓDULO 07: GENERADOR DE PROGRESIONES DE EJEMPLO
+
+        function generateProgression() {
+            const root = document.getElementById('progression-root').value;
+            const scale = document.getElementById('progression-scale').value;
+            const rootIndex = notes.indexOf(root);
+
+            let intervals, degrees, qualities, degreeNames;
+            
+            if (scale === 'major') {
+                intervals = [0, 2, 4, 5, 7, 9, 11];
+                degrees = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+                degreeNames = ['Tónica', 'Supertónica', 'Mediante', 'Subdominante', 'Dominante', 'Submediante', 'Sensible'];
+                qualities = ['', 'm', 'm', '', '', 'm', 'dim'];
+            } else {
+                intervals = [0, 2, 3, 5, 7, 8, 10];
+                degrees = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
+                degreeNames = ['Tónica', 'Supertónica', 'Mediante', 'Subdominante', 'Dominante', 'Submediante', 'Subtónica'];
+                qualities = ['m', 'dim', '', 'm', 'm', '', ''];
+            }
+
+            const scaleNotes = intervals.map(i => notes[(rootIndex + i) % 12]);
+
+            let result = '<h3 style="color: #d97706; margin-bottom: 20px;">📊 Progresión ' + (scale === 'major' ? 'Mayor' : 'Menor') + ' en ' + root + '</h3>';
+            
+            result += '<p style="font-size: 1.1rem; margin-bottom: 20px;"><strong>🎵 Escala:</strong> ' + scaleNotes.join(' - ') + '</p>';
+            
+            result += '<hr style="margin: 20px 0; border: 1px solid #f59e0b;">';
+            result += '<h4 style="color: #d97706; margin-bottom: 15px;">🎸 Acordes de la progresión:</h4>';
+            result += '<div style="text-align: left;">';
+            
+            scaleNotes.forEach((note, index) => {
+                const quality = qualities[index];
+                const degree = degrees[index];
+                const degreeName = degreeNames[index];
+                const chordNotes = getChordNotes(note, quality);
+                
+                const bgColor = index % 2 === 0 ? '#fef3c7' : '#fed7aa';
+                
+                result += '<div style="background: ' + bgColor + '; padding: 15px; margin-bottom: 12px; border-radius: 10px; border-left: 5px solid #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
+                result += '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">';
+                result += '<div>';
+                result += '<strong style="font-size: 1.3rem; color: #92400e;">' + degree + '</strong>';
+                result += '<span style="font-size: 1.2rem; color: #c2410c; margin-left: 10px;">' + note + quality + '</span>';
+                result += '<span style="color: #78350f; margin-left: 10px; font-style: italic;">(' + degreeName + ')</span>';
+                result += '</div></div>';
+                result += '<div style="margin-top: 8px; color: #92400e;"><strong>📝 Notas:</strong> ' + chordNotes.join(', ') + '</div>';
+                result += '</div>';
+            });
+            
+            result += '</div>';
+            
+            result += '<hr style="margin: 20px 0; border: 1px solid #f59e0b;">';
+            result += '<div style="background: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #fbbf24;">';
+            result += '<strong style="color: #92400e;">💡 Progresiones comunes en ' + (scale === 'major' ? 'Mayor' : 'Menor') + ':</strong>';
+            result += '<ul style="margin-top: 10px; color: #78350f; padding-left: 25px;">';
+            
+            if (scale === 'major') {
+                result += '<li><strong>I - V - vi - IV</strong> (Pop básico)</li>';
+                result += '<li><strong>I - IV - V</strong> (Blues/Rock clásico)</li>';
+                result += '<li><strong>ii - V - I</strong> (Jazz estándar)</li>';
+                result += '<li><strong>I - vi - IV - V</strong> (Doo-wop)</li>';
+                result += '<li><strong>I - iii - IV - V</strong> (Balada)</li>';
+            } else {
+                result += '<li><strong>i - VII - VI - VII</strong> (Rock alternativo)</li>';
+                result += '<li><strong>i - iv - v</strong> (Blues menor)</li>';
+                result += '<li><strong>i - VI - III - VII</strong> (Épico)</li>';
+                result += '<li><strong>i - v - i - v</strong> (Folk)</li>';
+                result += '<li><strong>i - III - VII - VI</strong> (Melancólico)</li>';
+            }
+            
+            result += '</ul></div>';
+
+            document.getElementById('progression-result').innerHTML = result;
+            document.getElementById('progression-result').style.display = 'block';
+        }
+		
+		// ========================================
+        // MÓDULO 08: COMPOSITOR DE PROGRESIONES
+        // Sistema de audio completamente independiente
+        // ========================================
+
+        // Audio Context independiente para Módulo 08
+        let audioContextM8 = null;
+
+        function initAudioM8() {
+            if (!audioContextM8) {
+                audioContextM8 = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playNoteM8(frequency, duration = 0.5, startTime = 0) {
+            initAudioM8();
+            const oscillator = audioContextM8.createOscillator();
+            const gainNode = audioContextM8.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContextM8.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            const now = audioContextM8.currentTime + startTime;
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+            
+            oscillator.start(now);
+            oscillator.stop(now + duration);
+        }
+
+        function getNoteFrequencyM8(note, octave = 4) {
+            const noteIndex = notesCromatic.indexOf(note);
+            if (noteIndex === -1) return 440;
+            const A4 = 440;
+            const semitoneOffset = (octave - 4) * 12 + (noteIndex - 9);
+            return A4 * Math.pow(2, semitoneOffset / 12);
+        }
+
+        function getChordNotesM8(root, quality) {
+            const rootIndex = notesCromatic.indexOf(root);
+            const intervals = chordIntervals[quality] || [0, 4, 7];
+            return intervals.map(interval => notesCromatic[(rootIndex + interval) % 12]);
+        }
+
+        function playChord(notes, baseDelay = 0) {
+            initAudioM8();
+            notes.forEach((note, index) => {
+                const freq = getNoteFrequencyM8(note, 4);
+                const delay = baseDelay + (index * 0.05);
+                playNoteM8(freq, 0.8, delay);
+            });
+        }
+
+        function changeProgressionBPM(change) {
+            progressionBPM = Math.max(60, Math.min(240, progressionBPM + change));
+            document.getElementById('prog-bpm-display').textContent = progressionBPM;
+        }
+
+        function toggleProgressionLoop() {
+            isProgressionLooping = !isProgressionLooping;
+            document.getElementById('loop-prog-btn').classList.toggle('active');
+        }
+
+        function updateChordPalette() {
+            const root = document.getElementById('prog-root').value;
+            const scale = document.getElementById('prog-scale').value;
+            
+            const intervals = scaleIntervals[scale];
+            const qualities = chordQualities[scale];
+            const numerals = romanNumerals[scale];
+            
+            const rootIndex = notesCromatic.indexOf(root);
+            const scaleNotes = intervals.map(i => notesCromatic[(rootIndex + i) % 12]);
+            
+            const palette = document.getElementById('chord-palette');
+            palette.innerHTML = '';
+            
+            scaleNotes.forEach((note, index) => {
+                const quality = qualities[index];
+                const numeral = numerals[index];
+                const chordNotes = getChordNotesM8(note, quality);
+                
+                const btn = document.createElement('div');
+                btn.className = 'chord-btn';
+                btn.id = `chord-btn-${index}`;
+                btn.style.background = chordColors[index];
+                btn.innerHTML = `
+                    <div style="font-size: 1.2rem; margin-bottom: 5px;">${numeral}</div>
+                    <div style="font-size: 0.9rem;">${note}${quality}</div>
+                    <div style="font-size: 0.7rem; margin-top: 3px; opacity: 0.8;">${chordNotes.join(', ')}</div>
+                `;
+                
+                btn.onclick = () => handleChordClick(note, quality, numeral, chordNotes, chordColors[index], index);
+                palette.appendChild(btn);
+            });
+            
+            const silenceBtn = document.createElement('div');
+            silenceBtn.className = 'chord-btn';
+            silenceBtn.id = 'chord-btn-silence';
+            silenceBtn.style.background = '#6b7280';
+            silenceBtn.style.color = 'white';
+            silenceBtn.innerHTML = `
+                <div style="font-size: 1.5rem; margin-bottom: 5px;">🔇</div>
+                <div style="font-size: 0.9rem;">Silencio</div>
+                <div style="font-size: 0.7rem; margin-top: 3px; opacity: 0.8;">Pausa</div>
+            `;
+            
+            silenceBtn.onclick = () => handleSilenceClick();
+            palette.appendChild(silenceBtn);
+        }
+
+        function handleChordClick(note, quality, numeral, notes, color, index) {
+            playChord(notes, 0);
+            
+            const btn = document.getElementById(`chord-btn-${index}`);
+            if (btn) {
+                btn.style.transform = 'scale(1.1)';
+                btn.style.boxShadow = '0 0 25px ' + color;
+                setTimeout(() => {
+                    btn.style.transform = '';
+                    btn.style.boxShadow = '';
+                }, 300);
+            }
+            
+            if (isRecordingProgression) {
+                addChordToProgression(note, quality, numeral, notes, color);
+            }
+        }
+
+        function handleSilenceClick() {
+            if (isRecordingProgression) {
+                addSilenceToProgression();
+            } else {
+                const btn = document.getElementById('chord-btn-silence');
+                if (btn) {
+                    const originalBg = btn.style.background;
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => {
+                        btn.style.background = originalBg;
+                    }, 200);
+                }
+            }
+        }
+
+        function toggleProgressionRecording() {
+            isRecordingProgression = !isRecordingProgression;
+            const btn = document.getElementById('record-prog-btn');
+            
+            if (isRecordingProgression) {
+                btn.textContent = '⏹️ Detener';
+                btn.classList.add('active');
+                btn.style.background = '#ef4444';
+                btn.style.color = '#fff';
+            } else {
+                btn.textContent = '▶️ Grabar';
+                btn.classList.remove('active');
+                btn.style.background = '#facc15';
+                btn.style.color = '#000';
+            }
+        }
+
+        function addChordToProgression(note, quality, numeral, notes, color) {
+            const newChord = {
+                note: note,
+                quality: quality,
+                numeral: numeral,
+                notes: notes,
+                color: color,
+                type: 'chord'
+            };
+            
+            if (isEditingProgression && selectedChordIndex >= 0) {
+                progressionChords.splice(selectedChordIndex + 1, 0, newChord);
+                selectedChordIndex++;
+            } else {
+                progressionChords.push(newChord);
+            }
+            
+            renderProgression();
+        }
+
+        function addSilenceToProgression() {
+            const newSilence = { type: 'silence' };
+            
+            if (isEditingProgression && selectedChordIndex >= 0) {
+                progressionChords.splice(selectedChordIndex + 1, 0, newSilence);
+                selectedChordIndex++;
+            } else {
+                progressionChords.push(newSilence);
+            }
+            
+            renderProgression();
+        }
+
+        function selectChordForEdit(index) {
+            if (!isEditingProgression) return;
+            selectedChordIndex = index;
+            renderProgression();
+        }
+
+        function toggleProgressionEditMode() {
+            isEditingProgression = !isEditingProgression;
+            const btn = document.getElementById('edit-prog-btn');
+            
+            if (isEditingProgression) {
+                btn.textContent = '💾 Guardar Edición';
+                btn.classList.add('active');
+                selectedChordIndex = -1;
+            } else {
+                btn.textContent = '✏️ Editar Progresión';
+                btn.classList.remove('active');
+                selectedChordIndex = -1;
+            }
+            
+            renderProgression();
+        }
+
+        function removeChordFromProgression(index) {
+            progressionChords.splice(index, 1);
+            renderProgression();
+        }
+
+        function renderProgression() {
+            const area = document.getElementById('progression-area');
+            
+            if (progressionChords.length === 0) {
+                area.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Haz clic en los acordes de arriba para construir tu progresión</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            if (isEditingProgression) {
+                html += '<div style="background: #fef3c7; border: 3px solid #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;"><strong style="color: #92400e;">✏️ MODO EDICIÓN:</strong> Haz clic en un acorde para seleccionarlo, luego agrega acordes desde la paleta para insertarlos después</div>';
+            }
+            
+            progressionChords.forEach((item, index) => {
+                const isSelected = selectedChordIndex === index;
+                const borderStyle = isSelected ? 'border: 6px solid #f97316; box-shadow: 0 0 20px #f97316;' : '';
+                
+                if (item.type === 'silence') {
+                    html += `
+                        <div class="progression-item" id="prog-item-${index}" style="background: #6b7280; color: white; --item-color: #6b7280; ${borderStyle}" ${isEditingProgression ? `onclick="selectChordForEdit(${index})"` : ''}>
+                            <div class="progression-item-number">#${index + 1}</div>
+                            <div class="progression-item-content">
+                                <div style="font-size: 1.2rem; font-weight: 900;">🔇 SILENCIO</div>
+                            </div>
+                            ${!isEditingProgression ? `<div class="remove-btn" onclick="removeChordFromProgression(${index})">✕</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="progression-item" id="prog-item-${index}" style="background: ${item.color}; --item-color: ${item.color}; ${borderStyle}" ${isEditingProgression ? `onclick="selectChordForEdit(${index})"` : ''}>
+                            <div class="progression-item-number">#${index + 1}</div>
+                            <div class="progression-item-content">
+                                <div style="font-size: 1.1rem; font-weight: 900;">
+                                    ${item.numeral} ${item.note}${item.quality} : 🎵 ${item.notes.join(' - ')}
+                                </div>
+                            </div>
+                            ${!isEditingProgression ? `<div class="remove-btn" onclick="removeChordFromProgression(${index})">✕</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+            
+            area.innerHTML = html;
+        }
+
+        function playProgression() {
+            if (progressionChords.length === 0) {
+                alert('⚠️ Agrega acordes a tu progresión primero');
+                return;
+            }
+            
+            if (isProgressionPlaying) {
+                stopProgression();
+                return;
+            }
+            
+            isProgressionPlaying = true;
+            const btn = document.getElementById('play-prog-btn');
+            btn.textContent = '⏸️ Detener';
+            btn.classList.remove('btn-green');
+            btn.classList.add('btn-red');
+            
+            let currentIndex = 0;
+            const beatDuration = 60000 / progressionBPM;
+            
+            function playNext() {
+                if (!isProgressionPlaying) return;
+                
+                if (currentIndex >= progressionChords.length) {
+                    if (isProgressionLooping) {
+                        currentIndex = 0;
+                    } else {
+                        stopProgression();
+                        return;
+                    }
+                }
+                
+                document.querySelectorAll('.progression-item').forEach(el => {
+                    el.classList.remove('playing');
+                });
+                
+                const currentEl = document.getElementById('prog-item-' + currentIndex);
+                if (currentEl) {
+                    currentEl.classList.add('playing');
+                    
+                    const container = document.getElementById('progression-area');
+                    const containerRect = container.getBoundingClientRect();
+                    const itemRect = currentEl.getBoundingClientRect();
+                    
+                    const isAbove = itemRect.top < containerRect.top;
+                    const isBelow = itemRect.bottom > containerRect.bottom;
+                    
+                    if (isAbove || isBelow) {
+                        const scrollTop = currentEl.offsetTop - container.offsetTop - (container.clientHeight / 2) + (currentEl.clientHeight / 2);
+                        container.scrollTo({
+                            top: scrollTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+                
+                const item = progressionChords[currentIndex];
+                
+                if (item.type !== 'silence') {
+                    playChord(item.notes, 0);
+                }
+                
+                currentIndex++;
+            }
+            
+            playNext();
+            progressionPlayInterval = setInterval(playNext, beatDuration);
+        }
+
+        function stopProgression() {
+            isProgressionPlaying = false;
+            if (progressionPlayInterval) {
+                clearInterval(progressionPlayInterval);
+                progressionPlayInterval = null;
+            }
+            
+            const btn = document.getElementById('play-prog-btn');
+            btn.textContent = '▶️ Escuchar';
+            btn.classList.add('btn-green');
+            btn.classList.remove('btn-red');
+            
+            document.querySelectorAll('.progression-item').forEach(el => {
+                el.classList.remove('playing');
+            });
+        }
+
+        function resetProgression() {
+            stopProgression();
+            progressionChords = [];
+            isProgressionLooping = false;
+            isEditingProgression = false;
+            isRecordingProgression = false;
+            selectedChordIndex = -1;
+            document.getElementById('loop-prog-btn').classList.remove('active');
+            document.getElementById('edit-prog-btn').classList.remove('active');
+            document.getElementById('edit-prog-btn').textContent = '✏️ Editar Progresión';
+            document.getElementById('record-prog-btn').classList.remove('active');
+            document.getElementById('record-prog-btn').textContent = '▶️ Grabar';
+            document.getElementById('record-prog-btn').style.background = '#facc15';
+            document.getElementById('record-prog-btn').style.color = '#000';
+            renderProgression();
+        }
+
+        function saveProgression() {
+            const title = document.getElementById('progression-title').value.trim();
+            
+            if (!title) {
+                alert('⚠️ Por favor ingresa un título para la progresión');
+                return;
+            }
+            
+            if (progressionChords.length === 0) {
+                alert('⚠️ No hay acordes en la progresión para guardar');
+                return;
+            }
+            
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const root = document.getElementById('prog-root').value;
+            const scale = document.getElementById('prog-scale').value;
+            
+            const progression = {
+                date: date,
+                title: title,
+                root: root,
+                scale: scale,
+                bpm: progressionBPM,
+                chords: JSON.parse(JSON.stringify(progressionChords))
+            };
+            
+            savedProgressions.push(progression);
+            document.getElementById('progression-title').value = '';
+            renderProgressionList();
+            alert('✅ Progresión guardada exitosamente');
+        }
+
+        function renderProgressionList() {
+            const list = document.getElementById('progression-list');
+            
+            if (savedProgressions.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay progresiones guardadas</p>';
+                return;
+            }
+            
+            let html = '';
+            for (let i = 0; i < savedProgressions.length; i++) {
+                const prog = savedProgressions[i];
+                const isEditing = editingProgressionIndex === i;
+                
+                html += `
+                    <div style="border: 4px solid #000; padding: 12px; margin-bottom: 12px; border-radius: 10px; background: #fff; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;">
+                        <input type="checkbox" id="prog-check-${i}" value="${i}" style="width: 20px; height: 20px;">
+                        
+                        <div style="min-width: 0;">
+                `;
+                
+                if (isEditing) {
+                    html += `
+                        <input type="text" id="prog-edit-title-${i}" value="${prog.title}" style="width: 100%; padding: 8px; border: 3px solid #333; border-radius: 8px; font-weight: bold; font-size: 11pt; margin-bottom: 6px; background: #fff; color: #000;">
+                    `;
+                } else {
+                    html += `
+                        <div style="font-weight: bold; font-size: 11pt; margin-bottom: 6px; color: #000;">${prog.title}</div>
+                    `;
+                }
+                
+                const scaleDisplay = prog.scale === 'major' ? 'Mayor' : prog.scale === 'minor' ? 'Menor Natural' : 'Menor Armónica';
+                
+                html += `
+                            <div style="color: #666; font-size: 0.75rem; margin-bottom: 3px;">📅 ${prog.date}</div>
+                            <div style="color: #555; font-size: 0.7rem;">🎵 ${prog.root} ${scaleDisplay} | ${prog.chords.length} acordes | BPM: ${prog.bpm}</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: nowrap;">
+                `;
+                
+                if (isEditing) {
+                    html += `
+                        <button onclick="saveProgressionTitleEdit(${i})" style="padding: 8px 16px; background: #3b82f6; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">💾</button>
+                        <button onclick="cancelProgressionTitleEdit()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">✕</button>
+                    `;
+                } else {
+                    html += `
+                        <button onclick="startProgressionTitleEdit(${i})" style="padding: 8px 16px; background: #a855f7; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">✏️</button>
+                        <button onclick="loadProgressionFromList(${i})" style="padding: 8px 16px; background: #22c55e; color: #000; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; white-space: nowrap;">Cargar</button>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
+        }
+
+        function startProgressionTitleEdit(index) {
+            editingProgressionIndex = index;
+            renderProgressionList();
+            setTimeout(() => {
+                const input = document.getElementById('prog-edit-title-' + index);
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function saveProgressionTitleEdit(index) {
+            const input = document.getElementById('prog-edit-title-' + index);
+            const newTitle = input.value.trim();
+            
+            if (!newTitle) {
+                alert('⚠️ El título no puede estar vacío');
+                return;
+            }
+            
+            savedProgressions[index].title = newTitle;
+            savedProgressions[index].date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            
+            editingProgressionIndex = -1;
+            renderProgressionList();
+            alert('✅ Título actualizado correctamente');
+        }
+
+        function cancelProgressionTitleEdit() {
+            editingProgressionIndex = -1;
+            renderProgressionList();
+        }
+
+        function loadProgressionFromList(index) {
+            const prog = savedProgressions[index];
+            
+            document.getElementById('prog-root').value = prog.root;
+            document.getElementById('prog-scale').value = prog.scale;
+            progressionBPM = prog.bpm;
+            document.getElementById('prog-bpm-display').textContent = progressionBPM;
+            
+            progressionChords = JSON.parse(JSON.stringify(prog.chords));
+            
+            updateChordPalette();
+            renderProgression();
+            
+            alert('✅ Progresión cargada: ' + prog.title);
+        }
+
+        function deleteSelectedProgressions() {
+            const checkboxes = document.querySelectorAll('[id^="prog-check-"]:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('⚠️ No hay progresiones seleccionadas para eliminar');
+                return;
+            }
+            
+            const confirmDelete = confirm(`¿Estás seguro de eliminar ${checkboxes.length} progresión(es)?`);
+            
+            if (!confirmDelete) return;
+            
+            const indices = Array.from(checkboxes).map(cb => parseInt(cb.value)).sort((a, b) => b - a);
+            indices.forEach(index => savedProgressions.splice(index, 1));
+            
+            renderProgressionList();
+            alert('✅ Progresiones eliminadas correctamente');
+        }		
+
+        // Inicialización
+        window.onload = function() {
+			changeMode('sharp');
+			renderHistory();
+			renderMetronomeBeats(4);
+			renderMetronomeSessions();
+			initNotePad();
+			renderNoteSequence();
+			renderPadSequences();
+			updateChordPalette();
+			renderProgression();
+			renderProgressionList();
+		};
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 08: Compositor PRO v2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 10px 20px;
+            border: 3px solid #000;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #fff;
+            color: #333;
+        }
+        .module {
+            background: white;
+            border: 4px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .module h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .help-btn {
+            background: #fbbf24;
+            color: #000;
+            border: 3px solid #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .help-content {
+            display: none;
+            background: #fef3c7;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 3px solid #fbbf24;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            margin-bottom: 10px;
+            background: white;
+            color: #000;
+        }
+        select { width: auto; font-weight: bold; }
+        input[type="number"] { width: 80px; text-align: center; }
+        .btn {
+            padding: 12px 24px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+        .btn-green { background: #22c55e; color: #000; }
+        .btn-red { background: #ef4444; color: #fff; }
+        .btn-purple { background: #a855f7; color: #fff; }
+        .btn-blue { background: #3b82f6; color: #fff; }
+        .btn-yellow { background: #facc15; color: #000; }
+        .btn-orange { background: #f97316; color: #fff; }
+        .btn-cyan { background: #06b6d4; color: #fff; }
+        .btn-pink { background: #ec4899; color: #fff; }
+        .btn.active { background: #7dd3fc; color: #000; }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .chord-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .chord-btn {
+            padding: 15px 10px;
+            border: 4px solid #000;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-align: center;
+            color: #000;
+        }
+        .chord-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .progression-display {
+            background: #f3f4f6;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            min-height: 150px;
+            max-height: 500px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .progression-item {
+            display: grid;
+            grid-template-columns: auto auto 1fr auto auto;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border: 4px solid #000;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            color: #000;
+            gap: 10px;
+            cursor: move;
+        }
+        .progression-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .progression-item-number {
+            background: rgba(0,0,0,0.15);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 900;
+            text-align: center;
+        }
+        .progression-item-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .duration-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,0,0,0.1);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+        .duration-control button {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .duration-control span {
+            min-width: 45px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .progression-item-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .mini-btn {
+            background: #3b82f6;
+            color: white;
+            border: 3px solid #000;
+            border-radius: 8px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .remove-btn { background: #ef4444; }
+        .color-btn { background: #f97316; }
+        .mini-btn:hover { transform: scale(1.1); }
+        .progression-item.playing {
+            transform: translateX(15px) scale(1.05);
+            box-shadow: 0 0 40px #fbbf24, 0 8px 25px rgba(0,0,0,0.4);
+            border-width: 6px;
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, var(--item-color) 0%, #fbbf24 100%) !important;
+        }
+        .progression-item.dragging { opacity: 0.5; cursor: grabbing; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .history-box {
+            background: #f3f4f6;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .preview-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 3px solid #000;
+            text-align: center;
+            font-weight: bold;
+        }
+        .stats-box {
+            background: #e0e7ff;
+            border: 3px solid #4f46e5;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6366f1;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .template-btn {
+            padding: 12px;
+            background: #f3f4f6;
+            border: 3px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .template-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            border: 4px solid #000;
+        }
+        .color-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .color-option {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .color-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Compositor de Progresiones PRO v2</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Modo</button>
+        </div>
+
+        <div class="module">
+            <h2>
+                🎹 Compositor de Progresiones
+                <button class="help-btn" onclick="toggleHelp(8)">❓ Ayuda</button>
+            </h2>
+            <div id="help-8" class="help-content">
+                <strong>✨ MEJORAS v2:</strong><br><br>
+                <strong>⏱️ Duración Individual:</strong> Cada acorde tiene su propia duración (botones +/-)<br>
+                <strong>📑 Duplicar Selectivo:</strong> Marca acordes y duplica solo los seleccionados<br>
+                <strong>🐛 Bug Fix:</strong> Eliminar registros guardados ahora funciona<br>
+                <strong>🎨 Drag & Drop:</strong> Arrastra para reordenar<br>
+                <strong>🔊 Volumen:</strong> Control de volumen general<br>
+                <strong>📤 Exportar/Importar:</strong> Comparte progresiones<br>
+                <strong>🎨 Colores:</strong> Personaliza cada acorde<br>
+                <strong>📚 Templates:</strong> 15 progresiones clásicas<br>
+            </div>
+
+            <!-- Controles -->
+            <div class="controls" style="margin-bottom: 20px;">
+                <label style="font-weight: bold; margin-right: 5px;">Tonalidad:</label>
+                <select id="prog-root" onchange="updateChordPalette()">
+                    <option value="C">C</option>
+                    <option value="C#">C#</option>
+                    <option value="D">D</option>
+                    <option value="D#">D#</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="F#">F#</option>
+                    <option value="G">G</option>
+                    <option value="G#">G#</option>
+                    <option value="A">A</option>
+                    <option value="A#">A#</option>
+                    <option value="B">B</option>
+                </select>
+
+                <label style="font-weight: bold; margin-right: 5px;">Escala:</label>
+                <select id="prog-scale" onchange="updateChordPalette()">
+                    <option value="major">Mayor</option>
+                    <option value="minor">Menor Natural</option>
+                    <option value="harmonic">Menor Armónica</option>
+                </select>
+            </div>
+
+            <!-- Templates -->
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-cyan" onclick="toggleTemplates()">📋 Progresiones Clásicas</button>
+                <button class="btn btn-pink" onclick="exportProgression()">📤 Exportar</button>
+                <button class="btn btn-pink" onclick="showImportModal()">📥 Importar</button>
+                <div id="templates-section" style="display: none; margin-top: 15px;">
+                    <div class="template-grid" id="template-list"></div>
+                </div>
+            </div>
+
+            <!-- Paleta de Acordes -->
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="color: #667eea; margin: 0;">🎼 Acordes Disponibles:</h3>
+                    <button class="btn btn-yellow" id="record-btn" onclick="toggleRecording()">⏺️ Grabar</button>
+                </div>
+                <div id="chord-palette" class="chord-grid"></div>
+            </div>
+
+            <!-- Vista Previa -->
+            <div id="preview-banner" class="preview-banner" style="display: none;">
+                <div style="font-size: 0.9rem; margin-bottom: 5px;">📋 Vista Previa:</div>
+                <div id="preview-text" style="font-size: 1.2rem;"></div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div id="stats-box" class="stats-box" style="display: none;">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Acordes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-duration">0s</div>
+                    <div class="stat-label">Duración</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-major">0</div>
+                    <div class="stat-label">Mayores</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-minor">0</div>
+                    <div class="stat-label">Menores</div>
+                </div>
+            </div>
+
+            <!-- Progresión -->
+            <div style="margin-bottom: 15px;">
+                <h3 style="color: #667eea; margin-bottom: 10px;">📋 Tu Progresión:</h3>
+                <div id="progression-area" class="progression-display">
+                    <p style="text-align: center; color: #666; padding: 40px;">
+                        Haz clic en los acordes de arriba para construir tu progresión
+                    </p>
+                </div>
+            </div>
+
+			<!-- Volumen Global -->
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">🔊 Volumen: <span id="volume-value">30%</span></label>
+                <input type="range" id="volume-control" min="0" max="100" value="30" oninput="updateVolume()" style="width: 100%; padding: 0; height: 40px; border: 3px solid #000; border-radius: 10px;">
+            </div>
+			
+            <!-- Controles de Reproducción y Duplicar -->
+            <div class="controls" style="margin-bottom: 20px;">
+                <button class="btn btn-green" id="play-prog-btn" onclick="playProgression()">▶️ Escuchar</button>
+                <button class="btn btn-purple" id="loop-prog-btn" onclick="toggleProgressionLoop()">🔁 Bucle</button>
+                <button class="btn btn-orange" id="edit-prog-btn" onclick="toggleEditMode()">✏️ Editar</button>
+                <button class="btn btn-cyan" onclick="duplicateSelected()">📑 Duplicar Sel.</button>
+                <button class="btn btn-cyan" onclick="duplicateAll()">📑 Duplicar Todo</button>
+                <button class="btn btn-red" onclick="resetProgression()">🔄 Reiniciar</button>
+            </div>
+
+            <!-- Guardar -->
+            <div style="margin-top: 15px;">
+                <input type="text" id="progression-title" placeholder="Título de la progresión...">
+                <button class="btn btn-green" onclick="saveProgression()">💾 Guardar</button>
+                <button class="btn btn-red" onclick="deleteSelectedProgressions()">🗑️ Eliminar Seleccionados</button>
+            </div>
+
+            <!-- Lista Guardada -->
+            <div id="progression-list" class="history-box"></div>
+        </div>
+    </div>
+
+    <!-- Modal Color -->
+    <div id="color-modal" class="modal" onclick="closeColorModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom: 15px;">🎨 Cambiar Color del Acorde</h3>
+            <div class="color-picker-grid">
+                <div class="color-option" style="background: #ff6b6b;" onclick="changeChordColor('#ff6b6b')"></div>
+                <div class="color-option" style="background: #feca57;" onclick="changeChordColor('#feca57')"></div>
+                <div class="color-option" style="background: #48dbfb;" onclick="changeChordColor('#48dbfb')"></div>
+                <div class="color-option" style="background: #ff9ff3;" onclick="changeChordColor('#ff9ff3')"></div>
+                <div class="color-option" style="background: #54a0ff;" onclick="changeChordColor('#54a0ff')"></div>
+                <div class="color-option" style="background: #00d2d3;" onclick="changeChordColor('#00d2d3')"></div>
+                <div class="color-option" style="background: #a29bfe;" onclick="changeChordColor('#a29bfe')"></div>
+                <div class="color-option" style="background: #fd79a8;" onclick="changeChordColor('#fd79a8')"></div>
+                <div class="color-option" style="background: #fdcb6e;" onclick="changeChordColor('#fdcb6e')"></div>
+                <div class="color-option" style="background: #6c5ce7;" onclick="changeChordColor('#6c5ce7')"></div>
+                <div class="color-option" style="background: #00b894;" onclick="changeChordColor('#00b894')"></div>
+                <div class="color-option" style="background: #e17055;" onclick="changeChordColor('#e17055')"></div>
+            </div>
+            <button class="btn btn-red" onclick="closeColorModal()" style="margin-top: 15px; width: 100%;">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Modal Importar -->
+    <div id="import-modal" class="modal" onclick="closeImportModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom: 15px;">📥 Importar Progresión</h3>
+            <p style="margin-bottom: 10px; color: #666;">Pega el código de progresión:</p>
+            <input type="text" id="import-code" placeholder="Ej: C-major:I-IV-V-I">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-green" onclick="importProgression()" style="flex: 1;">Importar</button>
+                <button class="btn btn-red" onclick="closeImportModal()" style="flex: 1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let progressionChords = [];
+        let isLooping = false;
+        let isPlaying = false;
+        let playInterval = null;
+        let audioContext = null;
+        let savedProgressions = [];
+        let editingProgressionIndex = -1;
+        let isEditingProgression = false;
+        let selectedChordIndex = -1;
+        let isRecording = false;
+        let masterVolume = 0.3;
+        let colorModalChordIndex = -1;
+        let draggedIndex = -1;
+
+        const notesCromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        const scaleIntervals = {
+            'major': [0, 2, 4, 5, 7, 9, 11],
+            'minor': [0, 2, 3, 5, 7, 8, 10],
+            'harmonic': [0, 2, 3, 5, 7, 8, 11]
+        };
+
+        const chordQualities = {
+            'major': ['', 'm', 'm', '', '', 'm', 'dim'],
+            'minor': ['m', 'dim', '', 'm', 'm', '', ''],
+            'harmonic': ['m', 'dim', 'aug', 'm', '', '', 'dim']
+        };
+
+        const romanNumerals = {
+            'major': ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+            'minor': ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
+            'harmonic': ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°']
+        };
+
+        const chordColors = [
+            '#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3',
+            '#54a0ff', '#00d2d3', '#a29bfe'
+        ];
+
+        const chordIntervals = {
+            '': [0, 4, 7],
+            'm': [0, 3, 7],
+            'dim': [0, 3, 6],
+            'aug': [0, 4, 8]
+        };
+
+        const progressionTemplates = {
+            'major': [
+                { name: 'Pop Moderno (I-V-vi-IV)', chords: [0, 4, 5, 3] },
+                { name: 'Rock Básico (I-IV-V)', chords: [0, 3, 4] },
+                { name: 'Blues (I-IV-I-V)', chords: [0, 3, 0, 4] },
+                { name: 'Jazz (ii-V-I)', chords: [1, 4, 0] },
+                { name: 'Canon (I-V-vi-iii-IV-I-IV-V)', chords: [0, 4, 5, 2, 3, 0, 3, 4] }
+            ],
+            'minor': [
+                { name: 'Rock Menor (i-VII-VI-VII)', chords: [0, 6, 5, 6] },
+                { name: 'Blues Menor (i-iv-v)', chords: [0, 3, 4] },
+                { name: 'Épico (i-VI-III-VII)', chords: [0, 5, 2, 6] }
+            ],
+            'harmonic': [
+                { name: 'Español (i-VII-VI-V)', chords: [0, 6, 5, 4] },
+                { name: 'Flamenco (i-VII-i-V)', chords: [0, 6, 0, 4] }
+            ]
+        };
+
+        // Audio
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playNote(frequency, duration = 0.5, startTime = 0, volume = masterVolume) {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            const now = audioContext.currentTime + startTime;
+            gainNode.gain.setValueAtTime(volume, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+            oscillator.start(now);
+            oscillator.stop(now + duration);
+        }
+
+        function getNoteFrequency(note, octave = 4) {
+            const noteIndex = notesCromatic.indexOf(note);
+            const A4 = 440;
+            const semitoneOffset = (octave - 4) * 12 + (noteIndex - 9);
+            return A4 * Math.pow(2, semitoneOffset / 12);
+        }
+
+        function getChordNotes(root, quality) {
+            const rootIndex = notesCromatic.indexOf(root);
+            const intervals = chordIntervals[quality] || [0, 4, 7];
+            return intervals.map(interval => notesCromatic[(rootIndex + interval) % 12]);
+        }
+
+        function playChord(notes, baseDelay = 0) {
+            initAudio();
+            notes.forEach((note, index) => {
+                const freq = getNoteFrequency(note, 4);
+                const delay = baseDelay + (index * 0.05);
+                playNote(freq, 0.8, delay, masterVolume);
+            });
+        }
+
+        // Interfaz
+        function toggleTheme() {
+            // Función para cambiar tema (opcional)
+        }
+
+        function toggleHelp(moduleNum) {
+            const help = document.getElementById('help-' + moduleNum);
+            help.style.display = help.style.display === 'none' || !help.style.display ? 'block' : 'none';
+        }
+
+        function updateVolume() {
+            const value = parseInt(document.getElementById('volume-control').value);
+            masterVolume = value / 100;
+            document.getElementById('volume-value').textContent = value + '%';
+        }
+
+        function toggleProgressionLoop() {
+            isLooping = !isLooping;
+            document.getElementById('loop-prog-btn').classList.toggle('active');
+        }
+
+        // Templates
+        function toggleTemplates() {
+            const section = document.getElementById('templates-section');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            if (section.style.display === 'block') {
+                renderTemplates();
+            }
+        }
+
+        function renderTemplates() {
+            const scale = document.getElementById('prog-scale').value;
+            const templates = progressionTemplates[scale] || [];
+            const list = document.getElementById('template-list');
+            
+            let html = '';
+            templates.forEach((template, index) => {
+                html += `
+                    <div class="template-btn" onclick="loadTemplate(${index})">
+                        <div style="font-weight: bold; margin-bottom: 5px; color: #667eea;">${template.name}</div>
+                        <div style="font-size: 0.8rem; color: #666;">${template.chords.length} acordes</div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        function loadTemplate(index) {
+            const scale = document.getElementById('prog-scale').value;
+            const root = document.getElementById('prog-root').value;
+            const template = progressionTemplates[scale][index];
+            
+            const intervals = scaleIntervals[scale];
+            const qualities = chordQualities[scale];
+            const numerals = romanNumerals[scale];
+            const rootIndex = notesCromatic.indexOf(root);
+            const scaleNotes = intervals.map(i => notesCromatic[(rootIndex + i) % 12]);
+            
+            progressionChords = [];
+            
+            template.chords.forEach(chordIndex => {
+                const note = scaleNotes[chordIndex];
+                const quality = qualities[chordIndex];
+                const numeral = numerals[chordIndex];
+                const chordNotes = getChordNotes(note, quality);
+                
+                progressionChords.push({
+                    note: note,
+                    quality: quality,
+                    numeral: numeral,
+                    notes: chordNotes,
+                    color: chordColors[chordIndex],
+                    type: 'chord',
+                    duration: 2.0 // Duración por defecto
+                });
+            });
+            
+            renderProgression();
+            updatePreviewAndStats();
+            alert('✅ Progresión cargada: ' + template.name);
+        }
+
+        // MEJORA: Duplicar selectivo
+        function duplicateSelected() {
+            const selected = progressionChords.filter(c => c.selected);
+            if (selected.length === 0) {
+                alert('⚠️ No hay acordes seleccionados. Marca los checkboxes primero.');
+                return;
+            }
+            
+            const copies = JSON.parse(JSON.stringify(selected));
+            copies.forEach(c => c.selected = false); // Limpiar selección en copias
+            progressionChords = progressionChords.concat(copies);
+            renderProgression();
+            updatePreviewAndStats();
+            alert(`✅ ${selected.length} acorde(s) duplicado(s)`);
+        }
+
+        function duplicateAll() {
+            if (progressionChords.length === 0) {
+                alert('⚠️ No hay progresión para duplicar');
+                return;
+            }
+            
+            const copy = JSON.parse(JSON.stringify(progressionChords));
+            copy.forEach(c => c.selected = false);
+            progressionChords = progressionChords.concat(copy);
+            renderProgression();
+            updatePreviewAndStats();
+            alert('✅ Progresión completa duplicada');
+        }
+
+        // Exportar/Importar
+        function exportProgression() {
+            if (progressionChords.length === 0) {
+                alert('⚠️ No hay progresión para exportar');
+                return;
+            }
+            
+            const root = document.getElementById('prog-root').value;
+            const scale = document.getElementById('prog-scale').value;
+            const chordStr = progressionChords.map(c => {
+                if (c.type === 'silence') return 'SIL';
+                return c.numeral + ':' + c.duration;
+            }).join('-');
+            
+            const code = `${root}-${scale}:${chordStr}`;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ Código copiado al portapapeles:\n\n' + code);
+            }).catch(() => {
+                prompt('📋 Copia este código:', code);
+            });
+        }
+
+        function showImportModal() {
+            document.getElementById('import-modal').style.display = 'flex';
+        }
+
+        function closeImportModal(event) {
+            if (!event || event.target.id === 'import-modal') {
+                document.getElementById('import-modal').style.display = 'none';
+                document.getElementById('import-code').value = '';
+            }
+        }
+
+        function importProgression() {
+            const code = document.getElementById('import-code').value.trim();
+            
+            if (!code) {
+                alert('⚠️ Ingresa un código válido');
+                return;
+            }
+            
+            try {
+                const [rootScale, chordsPart] = code.split(':');
+                const [root, scale] = rootScale.split('-');
+                
+                document.getElementById('prog-root').value = root;
+                document.getElementById('prog-scale').value = scale;
+                
+                updateChordPalette();
+                
+                const chordSymbols = chordsPart.split('-');
+                const intervals = scaleIntervals[scale];
+                const qualities = chordQualities[scale];
+                const numerals = romanNumerals[scale];
+                const rootIndex = notesCromatic.indexOf(root);
+                const scaleNotes = intervals.map(i => notesCromatic[(rootIndex + i) % 12]);
+                
+                progressionChords = [];
+                
+                chordSymbols.forEach(symbol => {
+                    if (symbol === 'SIL') {
+                        progressionChords.push({ type: 'silence', duration: 2.0 });
+                    } else {
+                        const [numeral, duration] = symbol.split(':');
+                        const chordIndex = numerals.indexOf(numeral);
+                        if (chordIndex >= 0) {
+                            const note = scaleNotes[chordIndex];
+                            const quality = qualities[chordIndex];
+                            const chordNotes = getChordNotes(note, quality);
+                            
+                            progressionChords.push({
+                                note: note,
+                                quality: quality,
+                                numeral: numeral,
+                                notes: chordNotes,
+                                color: chordColors[chordIndex],
+                                type: 'chord',
+                                duration: parseFloat(duration) || 2.0
+                            });
+                        }
+                    }
+                });
+                
+                renderProgression();
+                updatePreviewAndStats();
+                closeImportModal();
+                alert('✅ Progresión importada correctamente');
+                
+            } catch (e) {
+                alert('❌ Código inválido. Formato: C-major:I:2.0-IV:3.0-V:2.0');
+            }
+        }
+
+        // Color
+        function showColorPicker(index) {
+            colorModalChordIndex = index;
+            document.getElementById('color-modal').style.display = 'flex';
+        }
+
+        function closeColorModal(event) {
+            if (!event || event.target.id === 'color-modal') {
+                document.getElementById('color-modal').style.display = 'none';
+                colorModalChordIndex = -1;
+            }
+        }
+
+        function changeChordColor(color) {
+            if (colorModalChordIndex >= 0 && colorModalChordIndex < progressionChords.length) {
+                progressionChords[colorModalChordIndex].color = color;
+                renderProgression();
+                closeColorModal();
+            }
+        }
+
+        // Drag & Drop
+        function onDragStart(index) {
+            draggedIndex = index;
+            const item = document.getElementById('prog-item-' + index);
+            if (item) item.classList.add('dragging');
+        }
+
+        function onDragOver(event, index) {
+            event.preventDefault();
+            if (draggedIndex === -1 || draggedIndex === index) return;
+            
+            const temp = progressionChords[draggedIndex];
+            progressionChords[draggedIndex] = progressionChords[index];
+            progressionChords[index] = temp;
+            
+            draggedIndex = index;
+            renderProgression();
+        }
+
+        function onDragEnd() {
+            draggedIndex = -1;
+            document.querySelectorAll('.progression-item').forEach(el => {
+                el.classList.remove('dragging');
+            });
+        }
+
+        // Vista Previa y Stats
+        function updatePreviewAndStats() {
+            if (progressionChords.length === 0) {
+                document.getElementById('preview-banner').style.display = 'none';
+                document.getElementById('stats-box').style.display = 'none';
+                return;
+            }
+            
+            const preview = progressionChords.map(c => {
+                if (c.type === 'silence') return '🔇';
+                return c.numeral;
+            }).join(' - ');
+            
+            document.getElementById('preview-text').textContent = preview;
+            document.getElementById('preview-banner').style.display = 'block';
+            
+            const total = progressionChords.length;
+            const duration = progressionChords.reduce((sum, c) => sum + (c.duration || 2.0), 0).toFixed(1);
+            const major = progressionChords.filter(c => c.type === 'chord' && c.quality === '').length;
+            const minor = progressionChords.filter(c => c.type === 'chord' && c.quality === 'm').length;
+            
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-duration').textContent = duration + 's';
+            document.getElementById('stat-major').textContent = major;
+            document.getElementById('stat-minor').textContent = minor;
+            document.getElementById('stats-box').style.display = 'flex';
+        }
+
+        // Acordes
+        function updateChordPalette() {
+            const root = document.getElementById('prog-root').value;
+            const scale = document.getElementById('prog-scale').value;
+            
+            const intervals = scaleIntervals[scale];
+            const qualities = chordQualities[scale];
+            const numerals = romanNumerals[scale];
+            
+            const rootIndex = notesCromatic.indexOf(root);
+            const scaleNotes = intervals.map(i => notesCromatic[(rootIndex + i) % 12]);
+            
+            const palette = document.getElementById('chord-palette');
+            palette.innerHTML = '';
+            
+            scaleNotes.forEach((note, index) => {
+                const quality = qualities[index];
+                const numeral = numerals[index];
+                const chordNotes = getChordNotes(note, quality);
+                
+                const btn = document.createElement('div');
+                btn.className = 'chord-btn';
+                btn.id = `chord-btn-${index}`;
+                btn.style.background = chordColors[index];
+                btn.innerHTML = `
+                    <div style="font-size: 1.2rem; margin-bottom: 5px;">${numeral}</div>
+                    <div style="font-size: 0.9rem;">${note}${quality}</div>
+                    <div style="font-size: 0.7rem; margin-top: 3px; opacity: 0.8;">${chordNotes.join(', ')}</div>
+                `;
+                
+                btn.onclick = () => handleChordClick(note, quality, numeral, chordNotes, chordColors[index], index);
+                palette.appendChild(btn);
+            });
+            
+            const silenceBtn = document.createElement('div');
+            silenceBtn.className = 'chord-btn';
+            silenceBtn.id = 'chord-btn-silence';
+            silenceBtn.style.background = '#6b7280';
+            silenceBtn.style.color = 'white';
+            silenceBtn.innerHTML = `
+                <div style="font-size: 1.5rem; margin-bottom: 5px;">🔇</div>
+                <div style="font-size: 0.9rem;">Silencio</div>
+                <div style="font-size: 0.7rem; margin-top: 3px; opacity: 0.8;">Pausa</div>
+            `;
+            
+            silenceBtn.onclick = () => handleSilenceClick();
+            palette.appendChild(silenceBtn);
+        }
+
+        function handleChordClick(note, quality, numeral, notes, color, index) {
+            playChord(notes, 0);
+            
+            const btn = document.getElementById(`chord-btn-${index}`);
+            if (btn) {
+                btn.style.transform = 'scale(1.1)';
+                btn.style.boxShadow = '0 0 25px ' + color;
+                setTimeout(() => {
+                    btn.style.transform = '';
+                    btn.style.boxShadow = '';
+                }, 300);
+            }
+            
+            if (isRecording) {
+                addChordToProgression(note, quality, numeral, notes, color);
+            }
+        }
+
+        function handleSilenceClick() {
+            if (isRecording) {
+                addSilenceToProgression();
+            } else {
+                const btn = document.getElementById('chord-btn-silence');
+                if (btn) {
+                    const originalBg = btn.style.background;
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => {
+                        btn.style.background = originalBg;
+                    }, 200);
+                }
+            }
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const btn = document.getElementById('record-btn');
+            
+            if (isRecording) {
+                btn.textContent = '⏹️ Detener';
+                btn.classList.add('active');
+                btn.style.background = '#ef4444';
+                btn.style.color = '#fff';
+            } else {
+                btn.textContent = '⏺️ Grabar';
+                btn.classList.remove('active');
+                btn.style.background = '#facc15';
+                btn.style.color = '#000';
+            }
+        }
+
+        function addChordToProgression(note, quality, numeral, notes, color) {
+            const newChord = {
+                note: note,
+                quality: quality,
+                numeral: numeral,
+                notes: notes,
+                color: color,
+                type: 'chord',
+                duration: 2.0,
+                selected: false
+            };
+            
+            if (isEditingProgression && selectedChordIndex >= 0) {
+                progressionChords.splice(selectedChordIndex + 1, 0, newChord);
+                selectedChordIndex++;
+            } else {
+                progressionChords.push(newChord);
+            }
+            
+            renderProgression();
+            updatePreviewAndStats();
+        }
+
+        function addSilenceToProgression() {
+            const newSilence = { 
+                type: 'silence', 
+                duration: 2.0,
+                selected: false
+            };
+            
+            if (isEditingProgression && selectedChordIndex >= 0) {
+                progressionChords.splice(selectedChordIndex + 1, 0, newSilence);
+                selectedChordIndex++;
+            } else {
+                progressionChords.push(newSilence);
+            }
+            
+            renderProgression();
+            updatePreviewAndStats();
+        }
+
+        function toggleChordSelection(index) {
+            progressionChords[index].selected = !progressionChords[index].selected;
+            renderProgression();
+        }
+
+        // MEJORA: Cambiar duración individual
+        function changeDuration(index, change) {
+            const current = progressionChords[index].duration || 2.0;
+            const newDuration = Math.max(0.5, Math.min(8, current + change));
+            progressionChords[index].duration = newDuration;
+            renderProgression();
+            updatePreviewAndStats();
+        }
+
+        function selectChordForEdit(index) {
+            if (!isEditingProgression) return;
+            selectedChordIndex = index;
+            renderProgression();
+        }
+
+        function toggleEditMode() {
+            isEditingProgression = !isEditingProgression;
+            const btn = document.getElementById('edit-prog-btn');
+            
+            if (isEditingProgression) {
+                btn.textContent = '💾 Guardar Edición';
+                btn.classList.add('active');
+                selectedChordIndex = -1;
+            } else {
+                btn.textContent = '✏️ Editar';
+                btn.classList.remove('active');
+                selectedChordIndex = -1;
+            }
+            
+            renderProgression();
+        }
+
+        function removeChordFromProgression(index) {
+            progressionChords.splice(index, 1);
+            renderProgression();
+            updatePreviewAndStats();
+        }
+
+        function renderProgression() {
+            const area = document.getElementById('progression-area');
+            
+            if (progressionChords.length === 0) {
+                area.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Haz clic en los acordes de arriba para construir tu progresión</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            if (isEditingProgression) {
+                html += '<div style="background: #fef3c7; border: 3px solid #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;"><strong style="color: #92400e;">✏️ MODO EDICIÓN:</strong> Haz clic en un acorde para seleccionarlo</div>';
+            }
+            
+            progressionChords.forEach((item, index) => {
+                const isSelected = selectedChordIndex === index;
+                const borderStyle = isSelected ? 'border: 6px solid #f97316; box-shadow: 0 0 20px #f97316;' : '';
+                const isChecked = item.selected ? 'checked' : '';
+                
+                if (item.type === 'silence') {
+                    html += `
+                        <div class="progression-item" id="prog-item-${index}" 
+                             draggable="true"
+                             ondragstart="onDragStart(${index})"
+                             ondragover="onDragOver(event, ${index})"
+                             ondragend="onDragEnd()"
+                             style="background: #6b7280; color: white; --item-color: #6b7280; ${borderStyle}" 
+                             ${isEditingProgression ? `onclick="selectChordForEdit(${index})"` : ''}>
+                            <input type="checkbox" ${isChecked} onchange="toggleChordSelection(${index})" onclick="event.stopPropagation()" style="width: 20px; height: 20px;">
+                            <div class="progression-item-number">#${index + 1}</div>
+                            <div class="progression-item-content">
+                                <div style="font-size: 1.2rem; font-weight: 900;">🔇 SILENCIO</div>
+                            </div>
+                            <div class="duration-control">
+                                <button onclick="event.stopPropagation(); changeDuration(${index}, -0.5)">-</button>
+                                <span>${item.duration.toFixed(1)}s</span>
+                                <button onclick="event.stopPropagation(); changeDuration(${index}, 0.5)">+</button>
+                            </div>
+                            ${!isEditingProgression ? `
+                            <div class="progression-item-controls">
+                                <div class="mini-btn color-btn" onclick="event.stopPropagation(); showColorPicker(${index})">🎨</div>
+                                <div class="mini-btn remove-btn" onclick="event.stopPropagation(); removeChordFromProgression(${index})">✕</div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="progression-item" id="prog-item-${index}" 
+                             draggable="true"
+                             ondragstart="onDragStart(${index})"
+                             ondragover="onDragOver(event, ${index})"
+                             ondragend="onDragEnd()"
+                             style="background: ${item.color}; --item-color: ${item.color}; ${borderStyle}" 
+                             ${isEditingProgression ? `onclick="selectChordForEdit(${index})"` : ''}>
+                            <input type="checkbox" ${isChecked} onchange="toggleChordSelection(${index})" onclick="event.stopPropagation()" style="width: 20px; height: 20px;">
+                            <div class="progression-item-number">#${index + 1}</div>
+                            <div class="progression-item-content">
+                                <div style="font-size: 1.1rem; font-weight: 900;">
+                                    ${item.numeral} ${item.note}${item.quality} : 🎵 ${item.notes.join(' - ')}
+                                </div>
+                            </div>
+                            <div class="duration-control">
+                                <button onclick="event.stopPropagation(); changeDuration(${index}, -0.5)">-</button>
+                                <span>${item.duration.toFixed(1)}s</span>
+                                <button onclick="event.stopPropagation(); changeDuration(${index}, 0.5)">+</button>
+                            </div>
+                            ${!isEditingProgression ? `
+                            <div class="progression-item-controls">
+                                <div class="mini-btn color-btn" onclick="event.stopPropagation(); showColorPicker(${index})">🎨</div>
+                                <div class="mini-btn remove-btn" onclick="event.stopPropagation(); removeChordFromProgression(${index})">✕</div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+            
+            area.innerHTML = html;
+        }
+
+        // Reproducción
+        function playProgression() {
+            if (progressionChords.length === 0) {
+                alert('⚠️ Agrega acordes a tu progresión primero');
+                return;
+            }
+            
+            if (isPlaying) {
+                stopProgression();
+                return;
+            }
+            
+            isPlaying = true;
+            const btn = document.getElementById('play-prog-btn');
+            btn.textContent = '⏸️ Detener';
+            btn.classList.remove('btn-green');
+            btn.classList.add('btn-red');
+            
+            let currentIndex = 0;
+            
+            function playNext() {
+                if (!isPlaying) return;
+                
+                if (currentIndex >= progressionChords.length) {
+                    if (isLooping) {
+                        currentIndex = 0;
+                    } else {
+                        stopProgression();
+                        return;
+                    }
+                }
+                
+                document.querySelectorAll('.progression-item').forEach(el => {
+                    el.classList.remove('playing');
+                });
+                
+                const currentEl = document.getElementById('prog-item-' + currentIndex);
+                if (currentEl) {
+                    currentEl.classList.add('playing');
+                    
+                    const container = document.getElementById('progression-area');
+                    const containerRect = container.getBoundingClientRect();
+                    const itemRect = currentEl.getBoundingClientRect();
+                    
+                    const isAbove = itemRect.top < containerRect.top;
+                    const isBelow = itemRect.bottom > containerRect.bottom;
+                    
+                    if (isAbove || isBelow) {
+                        const scrollTop = currentEl.offsetTop - container.offsetTop - (container.clientHeight / 2) + (currentEl.clientHeight / 2);
+                        container.scrollTo({
+                            top: scrollTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+                
+                const item = progressionChords[currentIndex];
+                
+                if (item.type !== 'silence') {
+                    playChord(item.notes, 0);
+                }
+                
+                const beatDuration = (item.duration || 2.0) * 1000;
+                currentIndex++;
+                
+                playInterval = setTimeout(playNext, beatDuration);
+            }
+            
+            playNext();
+        }
+
+        function stopProgression() {
+            isPlaying = false;
+            if (playInterval) {
+                clearTimeout(playInterval);
+                playInterval = null;
+            }
+            
+            const btn = document.getElementById('play-prog-btn');
+            btn.textContent = '▶️ Escuchar';
+            btn.classList.add('btn-green');
+            btn.classList.remove('btn-red');
+            
+            document.querySelectorAll('.progression-item').forEach(el => {
+                el.classList.remove('playing');
+            });
+        }
+
+        function resetProgression() {
+            stopProgression();
+            progressionChords = [];
+            isLooping = false;
+            isEditingProgression = false;
+            isRecording = false;
+            selectedChordIndex = -1;
+            document.getElementById('loop-prog-btn').classList.remove('active');
+            document.getElementById('edit-prog-btn').classList.remove('active');
+            document.getElementById('edit-prog-btn').textContent = '✏️ Editar';
+            document.getElementById('record-btn').classList.remove('active');
+            document.getElementById('record-btn').textContent = '⏺️ Grabar';
+            document.getElementById('record-btn').style.background = '#facc15';
+            document.getElementById('record-btn').style.color = '#000';
+            renderProgression();
+            updatePreviewAndStats();
+        }
+
+        // Guardado (FIX del bug)
+        function saveProgression() {
+            const title = document.getElementById('progression-title').value.trim();
+            
+            if (!title) {
+                alert('⚠️ Por favor ingresa un título para la progresión');
+                return;
+            }
+            
+            if (progressionChords.length === 0) {
+                alert('⚠️ No hay acordes en la progresión para guardar');
+                return;
+            }
+            
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const root = document.getElementById('prog-root').value;
+            const scale = document.getElementById('prog-scale').value;
+            
+            const progression = {
+                date: date,
+                title: title,
+                root: root,
+                scale: scale,
+                chords: JSON.parse(JSON.stringify(progressionChords))
+            };
+            
+            savedProgressions.push(progression);
+            saveToLocalStorage();
+            
+            document.getElementById('progression-title').value = '';
+            
+            renderProgressionList();
+            alert('✅ Progresión guardada exitosamente');
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('musicalProgressions', JSON.stringify(savedProgressions));
+            } catch (e) {
+                console.error('Error al guardar:', e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const data = localStorage.getItem('musicalProgressions');
+                if (data) {
+                    savedProgressions = JSON.parse(data);
+                }
+            } catch (e) {
+                console.error('Error al cargar:', e);
+                savedProgressions = [];
+            }
+        }
+
+        function renderProgressionList() {
+            const list = document.getElementById('progression-list');
+            
+            if (savedProgressions.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay progresiones guardadas</p>';
+                return;
+            }
+            
+            let html = '';
+            for (let i = 0; i < savedProgressions.length; i++) {
+                const prog = savedProgressions[i];
+                const isEditing = editingProgressionIndex === i;
+                
+                html += `
+                    <div style="border: 4px solid #000; padding: 12px; margin-bottom: 12px; border-radius: 10px; background: #fff; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;">
+                        <input type="checkbox" class="prog-checkbox" data-index="${i}" style="width: 20px; height: 20px;" onclick="event.stopPropagation();">
+                        
+                        <div style="min-width: 0;">
+                `;
+                
+                if (isEditing) {
+                    html += `<input type="text" id="prog-edit-title-${i}" value="${prog.title}" style="width: 100%; padding: 8px; border: 3px solid #333; border-radius: 8px; font-weight: bold; font-size: 11pt; margin-bottom: 6px; background: #fff; color: #000;">`;
+                } else {
+                    html += `<div style="font-weight: bold; font-size: 11pt; margin-bottom: 6px; color: #000;">${prog.title}</div>`;
+                }
+                
+                html += `
+                            <div style="color: #666; font-size: 0.75rem; margin-bottom: 3px;">📅 ${prog.date}</div>
+                            <div style="color: #555; font-size: 0.7rem;">🎵 ${prog.root} ${prog.scale === 'major' ? 'Mayor' : prog.scale === 'minor' ? 'Menor Natural' : 'Menor Armónica'} | ${prog.chords.length} acordes</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: nowrap;">
+                `;
+                
+                if (isEditing) {
+                    html += `
+                        <button onclick="saveProgressionTitleEdit(${i})" style="padding: 8px 16px; background: #3b82f6; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">💾</button>
+                        <button onclick="cancelProgressionTitleEdit()" style="padding: 8px 16px; background: #6b7280; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">✕</button>
+                    `;
+                } else {
+                    html += `
+                        <button onclick="startProgressionTitleEdit(${i})" style="padding: 8px 16px; background: #a855f7; color: #fff; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">✏️</button>
+                        <button onclick="loadProgressionFromList(${i})" style="padding: 8px 16px; background: #22c55e; color: #000; border: 3px solid #000; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cargar</button>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
+        }
+
+        function startProgressionTitleEdit(index) {
+            editingProgressionIndex = index;
+            renderProgressionList();
+            setTimeout(() => {
+                const input = document.getElementById('prog-edit-title-' + index);
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function saveProgressionTitleEdit(index) {
+            const input = document.getElementById('prog-edit-title-' + index);
+            const newTitle = input.value.trim();
+            
+            if (!newTitle) {
+                alert('⚠️ El título no puede estar vacío');
+                return;
+            }
+            
+            savedProgressions[index].title = newTitle;
+            savedProgressions[index].date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            
+            saveToLocalStorage();
+            editingProgressionIndex = -1;
+            renderProgressionList();
+            alert('✅ Título actualizado correctamente');
+        }
+
+        function cancelProgressionTitleEdit() {
+            editingProgressionIndex = -1;
+            renderProgressionList();
+        }
+
+        function loadProgressionFromList(index) {
+            const prog = savedProgressions[index];
+            
+            document.getElementById('prog-root').value = prog.root;
+            document.getElementById('prog-scale').value = prog.scale;
+            
+            progressionChords = JSON.parse(JSON.stringify(prog.chords));
+            
+            // Asegurar que cada acorde tenga duración
+            progressionChords.forEach(c => {
+                if (!c.duration) c.duration = 2.0;
+                c.selected = false;
+            });
+            
+            updateChordPalette();
+            renderProgression();
+            updatePreviewAndStats();
+            
+            alert('✅ Progresión cargada: ' + prog.title);
+        }
+
+        // FIX FINAL: Eliminar sin confirm() por sandbox
+        function deleteSelectedProgressions() {
+            try {
+                const checkboxes = document.querySelectorAll('.prog-checkbox:checked');
+                
+                if (checkboxes.length === 0) {
+                    showNotification('⚠️ No hay progresiones seleccionadas para eliminar', 'warning');
+                    return;
+                }
+                
+                // Obtener índices
+                const indices = [];
+                
+                for (let i = 0; i < checkboxes.length; i++) {
+                    const cb = checkboxes[i];
+                    let index = cb.dataset.index || cb.getAttribute('data-index');
+                    
+                    if (index !== null && index !== undefined && index !== '') {
+                        index = parseInt(index);
+                        if (!isNaN(index)) {
+                            indices.push(index);
+                        }
+                    }
+                }
+                
+                if (indices.length === 0) {
+                    showNotification('❌ Error: No se pudieron obtener los índices', 'error');
+                    return;
+                }
+                
+                // Ordenar de mayor a menor
+                indices.sort((a, b) => b - a);
+                
+                // Eliminar
+                indices.forEach(index => {
+                    if (index >= 0 && index < savedProgressions.length) {
+                        savedProgressions.splice(index, 1);
+                    }
+                });
+                
+                saveToLocalStorage();
+                renderProgressionList();
+                showNotification(`✅ ${indices.length} progresión(es) eliminada(s)`, 'success');
+                
+            } catch (error) {
+                console.error('ERROR:', error);
+                showNotification('❌ Error al eliminar: ' + error.message, 'error');
+            }
+        }
+
+        // Sistema de notificaciones (reemplaza alert/confirm)
+        function showNotification(message, type = 'info') {
+            // Remover notificación anterior si existe
+            const existing = document.getElementById('notification-toast');
+            if (existing) existing.remove();
+            
+            const colors = {
+                'success': '#22c55e',
+                'error': '#ef4444',
+                'warning': '#f59e0b',
+                'info': '#3b82f6'
+            };
+            
+            const toast = document.createElement('div');
+            toast.id = 'notification-toast';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                border: 3px solid #000;
+                font-weight: bold;
+                font-size: 1rem;
+                z-index: 10000;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Agregar estilos de animación
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Inicialización
+        window.onload = function() {
+            loadFromLocalStorage();
+            updateChordPalette();
+            renderProgression();
+            renderProgressionList();
+            updatePreviewAndStats();
+        };
+    </script>
+</body>
+</html>
